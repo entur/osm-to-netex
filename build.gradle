@@ -12,6 +12,7 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile group: 'org.entur', name: 'netex-java-model', version: '1.0.7'
 }
 
 task runConversion(type: JavaExec) {
