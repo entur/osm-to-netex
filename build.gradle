@@ -3,6 +3,7 @@ version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
 apply plugin: 'application'
+apply plugin: 'idea'
 
 sourceCompatibility = 1.9
 
@@ -20,6 +21,7 @@ dependencies {
     compile "com.sun.xml.bind:jaxb-impl:${jaxbVersion}"
     compile "javax.activation:activation:1.1.1"
     compile "org.slf4j:slf4j-simple:1.7.21"
+    compile "commons-cli:commons-cli:1.4"
 }
 
 task runConversion(type: JavaExec) {
@@ -27,4 +29,14 @@ task runConversion(type: JavaExec) {
         args Eval.me(appArgs)
     }
     mainClassName = "org.entur.netex.conversion.osm.OsmToNetex"
+}
+
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'org.entur.netex.conversion.osm.OsmToNetex'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
 }
