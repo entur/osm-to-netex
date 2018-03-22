@@ -31,7 +31,7 @@ public class OsmToNetexTransformer {
         this.netexHelper = netexHelper;
     }
 
-    public void transform(String file) throws JAXBException, FileNotFoundException, ClassNotFoundException {
+    public void transform(String file, String netexOutputFile) throws JAXBException, FileNotFoundException, ClassNotFoundException {
 
         JAXBContext osmContext = JAXBContext.newInstance(Osm.class);
 
@@ -51,8 +51,10 @@ public class OsmToNetexTransformer {
 
         PublicationDeliveryStructure publicationDeliveryStructure = netexHelper.createPublicationDelivery(siteFrame);
 
-        FileOutputStream fileOutputStream = new FileOutputStream("netex.xml");
+        FileOutputStream fileOutputStream = new FileOutputStream(netexOutputFile);
         netexHelper.marshalNetex(publicationDeliveryStructure, fileOutputStream);
+
+        logger.info("Done. Check the result in the file {}", netexOutputFile);
     }
 
 
