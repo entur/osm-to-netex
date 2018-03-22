@@ -25,5 +25,5 @@ task runConversion(type: JavaExec) {
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
-    mainClassName = "org.entur.netex.conversion.osm.OsmToNetexTariffZone"
+    mainClassName = "org.entur.netex.conversion.osm.OsmToNetex"
 }
