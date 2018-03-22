@@ -23,21 +23,16 @@
 
 package org.openstreetmap.osm;
 
+import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -54,15 +49,13 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "bounds",
-    "node",
-    "way",
-    "relation"
+        "bounds",
+        "node",
+        "way",
+        "relation"
 })
 @XmlRootElement(name = "osm")
 public class Osm {
@@ -79,11 +72,9 @@ public class Osm {
 
     /**
      * Gets the value of the bounds property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Bounds }
-     *     
+     *
+     * @return possible object is
+     * {@link Bounds }
      */
     public Bounds getBounds() {
         return bounds;
@@ -91,11 +82,9 @@ public class Osm {
 
     /**
      * Sets the value of the bounds property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Bounds }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Bounds }
      */
     public void setBounds(Bounds value) {
         this.bounds = value;
@@ -103,25 +92,23 @@ public class Osm {
 
     /**
      * Gets the value of the node property.
-     * 
+     * <p>
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the node property.
-     * 
+     * <p>
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getNode().add(newItem);
      * </pre>
-     * 
-     * 
+     * <p>
+     * <p>
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Node }
-     * 
-     * 
      */
     public List<Node> getNode() {
         if (node == null) {
@@ -132,25 +119,23 @@ public class Osm {
 
     /**
      * Gets the value of the way property.
-     * 
+     * <p>
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the way property.
-     * 
+     * <p>
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getWay().add(newItem);
      * </pre>
-     * 
-     * 
+     * <p>
+     * <p>
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Way }
-     * 
-     * 
      */
     public List<Way> getWay() {
         if (way == null) {
@@ -161,25 +146,23 @@ public class Osm {
 
     /**
      * Gets the value of the relation property.
-     * 
+     * <p>
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the relation property.
-     * 
+     * <p>
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getRelation().add(newItem);
      * </pre>
-     * 
-     * 
+     * <p>
+     * <p>
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Relation }
-     * 
-     * 
      */
     public List<Relation> getRelation() {
         if (relation == null) {
@@ -190,15 +173,13 @@ public class Osm {
 
     /**
      * Gets the value of the version property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Float }
-     *     
+     *
+     * @return possible object is
+     * {@link Float }
      */
     public float getVersion() {
         if (version == null) {
-            return  0.6F;
+            return 0.6F;
         } else {
             return version;
         }
@@ -206,11 +187,9 @@ public class Osm {
 
     /**
      * Sets the value of the version property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Float }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Float }
      */
     public void setVersion(Float value) {
         this.version = value;
@@ -218,11 +197,9 @@ public class Osm {
 
     /**
      * Gets the value of the generator property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getGenerator() {
         if (generator == null) {
@@ -234,11 +211,9 @@ public class Osm {
 
     /**
      * Sets the value of the generator property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setGenerator(String value) {
         this.generator = value;

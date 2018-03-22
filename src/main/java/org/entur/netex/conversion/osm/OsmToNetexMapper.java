@@ -1,3 +1,18 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
 package org.entur.netex.conversion.osm;
 
 import net.opengis.gml._3.AbstractRingPropertyType;
@@ -15,23 +30,30 @@ import org.slf4j.LoggerFactory;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Map osm Ways to Netex Zones
+ *
+ * @param <T>
+ */
 public class OsmToNetexMapper<T extends Zone_VersionStructure> {
 
-    private static final Logger logger = LoggerFactory.getLogger(OsmToNetexTransformer.class);
+    /**
+     * The prefix (usually three letters) in IDs.
+     */
     public static final String CODESPACE = "codespace";
+    /**
+     * The objects name that will be retrieved from a tag with the same value.
+     */
     public static final String NAME = "name";
-
-
     /**
      * Reference, which is the postfix of the generated Netex ID
      */
     public static final String REFERENCE = "reference";
     public static final String DEFAULT_VERSION = "1";
-
+    private static final Logger logger = LoggerFactory.getLogger(OsmToNetexTransformer.class);
     private static final net.opengis.gml._3.ObjectFactory openGisObjectFactory = new net.opengis.gml._3.ObjectFactory();
     private final NetexHelper netexHelper;
 

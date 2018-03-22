@@ -19,6 +19,9 @@ import org.apache.commons.cli.*;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.TariffZone;
 
+/**
+ * Entry point for running.
+ */
 public class OsmToNetexApp {
 
     public static final String OSM_FILE = "osmFile";
@@ -38,7 +41,7 @@ public class OsmToNetexApp {
         try {
             CommandLine cmd = parser.parse(options, args);
             String osmFile = cmd.getOptionValue(OSM_FILE);
-            if(osmFile == null) {
+            if (osmFile == null) {
                 printHelp(options);
                 System.exit(1);
             }
@@ -53,7 +56,7 @@ public class OsmToNetexApp {
 
             OsmToNetexTransformer osmToNetexTransformer = new OsmToNetexTransformer(netexHelper, targetEntity);
             osmToNetexTransformer.transform(osmFile, netexOutputFile);
-        } catch(UnrecognizedOptionException e) {
+        } catch (UnrecognizedOptionException e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
             printHelp(options);
@@ -64,6 +67,6 @@ public class OsmToNetexApp {
 
     public static void printHelp(Options options) {
         HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp( "java -jar <path-to-jar-file>", options);
+        formatter.printHelp("java -jar <path-to-jar-file>", options);
     }
 }

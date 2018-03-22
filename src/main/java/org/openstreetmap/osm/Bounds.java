@@ -23,18 +23,14 @@
 
 package org.openstreetmap.osm;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ * <p>
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p>
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -47,8 +43,6 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "")
@@ -66,11 +60,9 @@ public class Bounds {
 
     /**
      * Gets the value of the minlat property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Double }
-     *     
+     *
+     * @return possible object is
+     * {@link Double }
      */
     public Double getMinlat() {
         return minlat;
@@ -78,11 +70,9 @@ public class Bounds {
 
     /**
      * Sets the value of the minlat property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Double }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Double }
      */
     public void setMinlat(Double value) {
         this.minlat = value;
@@ -90,11 +80,9 @@ public class Bounds {
 
     /**
      * Gets the value of the minlon property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Double }
-     *     
+     *
+     * @return possible object is
+     * {@link Double }
      */
     public Double getMinlon() {
         return minlon;
@@ -102,11 +90,9 @@ public class Bounds {
 
     /**
      * Sets the value of the minlon property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Double }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Double }
      */
     public void setMinlon(Double value) {
         this.minlon = value;
@@ -114,11 +100,9 @@ public class Bounds {
 
     /**
      * Gets the value of the maxlat property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Double }
-     *     
+     *
+     * @return possible object is
+     * {@link Double }
      */
     public Double getMaxlat() {
         return maxlat;
@@ -126,11 +110,9 @@ public class Bounds {
 
     /**
      * Sets the value of the maxlat property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Double }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Double }
      */
     public void setMaxlat(Double value) {
         this.maxlat = value;
@@ -138,11 +120,9 @@ public class Bounds {
 
     /**
      * Gets the value of the maxlon property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Double }
-     *     
+     *
+     * @return possible object is
+     * {@link Double }
      */
     public Double getMaxlon() {
         return maxlon;
@@ -150,11 +130,9 @@ public class Bounds {
 
     /**
      * Sets the value of the maxlon property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Double }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Double }
      */
     public void setMaxlon(Double value) {
         this.maxlon = value;
