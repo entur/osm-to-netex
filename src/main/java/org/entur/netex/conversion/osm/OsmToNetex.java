@@ -16,13 +16,15 @@
 package org.entur.netex.conversion.osm;
 
 import org.rutebanken.netex.model.ObjectFactory;
+import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class OsmToNetex {
 
-    public static void main(String[] args) throws FileNotFoundException, JAXBException {
+    public static void main(String[] args) throws IOException, JAXBException, SAXException {
 
         String file = args.length == 0 ? "osm.xml" : args[0];
 

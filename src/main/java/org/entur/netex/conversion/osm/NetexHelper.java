@@ -1,10 +1,13 @@
 package org.entur.netex.conversion.osm;
 
 import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.validation.NeTExValidator;
+import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.time.OffsetDateTime;
@@ -14,10 +17,10 @@ public class NetexHelper {
     private final ObjectFactory netexObjectFactory;
     private final Marshaller marshaller;
 
-    public NetexHelper(ObjectFactory netexObjectFactory) throws JAXBException {
+    public NetexHelper(ObjectFactory netexObjectFactory) throws JAXBException, IOException, SAXException {
         this.netexObjectFactory = netexObjectFactory;
-        this.marshaller = JAXBContext.newInstance(StopPlace.class).createMarshaller();
-
+        marshaller = JAXBContext.newInstance(StopPlace.class).createMarshaller();
+        marshaller.setSchema(new NeTExValidator().getSchema());
     }
 
 
@@ -29,6 +32,7 @@ public class NetexHelper {
     public PublicationDeliveryStructure createPublicationDelivery(SiteFrame siteFrame) {
         PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure()
                 .withPublicationTimestamp(OffsetDateTime.now())
+                .withParticipantRef(OsmToNetex.class.getCanonicalName())
                 .withDataObjects(new PublicationDeliveryStructure.DataObjects()
                         .withCompositeFrameOrCommonFrame(netexObjectFactory.createSiteFrame(siteFrame)));
 
