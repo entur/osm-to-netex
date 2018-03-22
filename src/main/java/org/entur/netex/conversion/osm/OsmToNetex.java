@@ -15,9 +15,14 @@
 
 package org.entur.netex.conversion.osm;
 
+import org.apache.commons.cli.*;
 import org.rutebanken.netex.model.ObjectFactory;
 
 public class OsmToNetex {
+
+    public static final String OSM_FILE = "osmFile";
+    public static final String NETEX_OUTPUT_FILE = "netexOutputFile";
+    public static final String NETEX_OUTPUT_FILE_DEFAULT_VALUE = "netex.xml";
 
     public static void main(String[] args) throws Exception {
 
@@ -25,11 +30,31 @@ public class OsmToNetex {
 
         System.out.println("File arg = " + file);
 
+        Options options = new Options();
+        options.addOption(OSM_FILE, true, "Osm file to convert from");
+        options.addOption(NETEX_OUTPUT_FILE, true, "Netex file name to write");
+
+        CommandLineParser parser = new DefaultParser();
+        CommandLine cmd = parser.parse( options, args);
+
+        String osmFile = cmd.getOptionValue(OSM_FILE);
+
+        if(osmFile == null) {
+
+            HelpFormatter formatter = new HelpFormatter();
+
+            formatter.printHelp( "java -jar ascdf", options);
+            System.exit(1);
+        }
+
+        String netexOutputFile = cmd.getOptionValue(NETEX_OUTPUT_FILE, NETEX_OUTPUT_FILE_DEFAULT_VALUE);
+
+
         ObjectFactory netexObjectFactory = new ObjectFactory();
         NetexHelper netexHelper = new NetexHelper(netexObjectFactory);
 
         OsmToNetexTransformer osmToNetexTransformer = new OsmToNetexTransformer(netexHelper);
-        osmToNetexTransformer.transform(file);
+        osmToNetexTransformer.transform(osmFile, netexOutputFile);
     }
 
 
