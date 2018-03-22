@@ -19,7 +19,6 @@ import org.rutebanken.netex.model.ObjectFactory;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class OsmToNetex {
@@ -33,8 +32,8 @@ public class OsmToNetex {
         ObjectFactory netexObjectFactory = new ObjectFactory();
         NetexHelper netexHelper = new NetexHelper(netexObjectFactory);
 
-        Converter converter = new Converter(netexHelper);
-        converter.transform(file);
+        OsmToNetexTransformer osmToNetexTransformer = new OsmToNetexTransformer(netexHelper);
+        osmToNetexTransformer.transform(file);
     }
 
 
