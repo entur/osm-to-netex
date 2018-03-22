@@ -34,7 +34,7 @@ public class NetexHelper {
                 .withPublicationTimestamp(OffsetDateTime.now())
                 .withDescription(new MultilingualString()
                         .withValue(generatePublicationDeliveryDescription()))
-                .withParticipantRef(OsmToNetex.class.getCanonicalName())
+                .withParticipantRef(OsmToNetexApp.class.getCanonicalName())
                 .withDataObjects(new PublicationDeliveryStructure.DataObjects()
                         .withCompositeFrameOrCommonFrame(netexObjectFactory.createSiteFrame(siteFrame)));
 

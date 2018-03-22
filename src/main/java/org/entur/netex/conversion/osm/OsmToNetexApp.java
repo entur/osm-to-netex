@@ -18,7 +18,7 @@ package org.entur.netex.conversion.osm;
 import org.apache.commons.cli.*;
 import org.rutebanken.netex.model.ObjectFactory;
 
-public class OsmToNetex {
+public class OsmToNetexApp {
 
     public static final String OSM_FILE = "osmFile";
     public static final String NETEX_OUTPUT_FILE = "netexOutputFile";
