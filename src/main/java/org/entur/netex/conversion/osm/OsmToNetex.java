@@ -26,36 +26,38 @@ public class OsmToNetex {
 
     public static void main(String[] args) throws Exception {
 
-        String file = args.length == 0 ? "osm.xml" : args[0];
-
-        System.out.println("File arg = " + file);
-
         Options options = new Options();
         options.addOption(OSM_FILE, true, "Osm file to convert from");
         options.addOption(NETEX_OUTPUT_FILE, true, "Netex file name to write");
 
+
         CommandLineParser parser = new DefaultParser();
-        CommandLine cmd = parser.parse( options, args);
+        try {
+            CommandLine cmd = parser.parse(options, args);
+            String osmFile = cmd.getOptionValue(OSM_FILE);
+            if(osmFile == null) {
+                printHelp(options);
+                System.exit(1);
+            }
 
-        String osmFile = cmd.getOptionValue(OSM_FILE);
+            String netexOutputFile = cmd.getOptionValue(NETEX_OUTPUT_FILE, NETEX_OUTPUT_FILE_DEFAULT_VALUE);
 
-        if(osmFile == null) {
+            ObjectFactory netexObjectFactory = new ObjectFactory();
+            NetexHelper netexHelper = new NetexHelper(netexObjectFactory);
 
-            HelpFormatter formatter = new HelpFormatter();
-
-            formatter.printHelp( "java -jar ascdf", options);
+            OsmToNetexTransformer osmToNetexTransformer = new OsmToNetexTransformer(netexHelper);
+            osmToNetexTransformer.transform(osmFile, netexOutputFile);
+        } catch(UnrecognizedOptionException e) {
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+            printHelp(options);
             System.exit(1);
         }
-
-        String netexOutputFile = cmd.getOptionValue(NETEX_OUTPUT_FILE, NETEX_OUTPUT_FILE_DEFAULT_VALUE);
-
-
-        ObjectFactory netexObjectFactory = new ObjectFactory();
-        NetexHelper netexHelper = new NetexHelper(netexObjectFactory);
-
-        OsmToNetexTransformer osmToNetexTransformer = new OsmToNetexTransformer(netexHelper);
-        osmToNetexTransformer.transform(osmFile, netexOutputFile);
     }
 
 
+    public static void printHelp(Options options) {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp( "java -jar <path-to-jar-file>", options);
+    }
 }

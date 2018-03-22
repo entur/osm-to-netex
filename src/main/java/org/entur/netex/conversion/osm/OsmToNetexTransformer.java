@@ -84,7 +84,7 @@ public class OsmToNetexTransformer {
     }
 
     private Class<? extends Zone_VersionStructure> validateAndGetDestinationClass(String className) throws ClassNotFoundException {
-        Class<?> clazz = Class.forName(StopPlace.class.getPackageName() + "." + className);
+        Class<?> clazz = Class.forName(StopPlace.class.getPackage().getName() + "." + className);
         if (!Zone_VersionStructure.class.isAssignableFrom(clazz)) {
             throw new IllegalArgumentException("The class specified:" + className + ", is not a Zone !");
         }
