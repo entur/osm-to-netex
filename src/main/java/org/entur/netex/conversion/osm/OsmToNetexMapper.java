@@ -96,8 +96,8 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
             }
         }
 
-        tagValueNotNullOrExit(CODESPACE, codespace);
-        tagValueNotNullOrExit(REFERENCE, reference);
+        tagValueNotNull(CODESPACE, codespace);
+        tagValueNotNull(REFERENCE, reference);
 
 
         zone.setId(generateId(codespace, className, reference));
@@ -111,7 +111,7 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
         return osmTagName.substring(osmTagName.lastIndexOf(':') + 1);
     }
 
-    private void tagValueNotNullOrExit(String name, String value) {
+    private void tagValueNotNull(String name, String value) {
 
         if (value == null) {
             throw new IllegalArgumentException("Cannot map " + name + " from tag.");
