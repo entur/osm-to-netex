@@ -26,9 +26,11 @@ public class OsmToNetexTransformer {
 
 
     private final NetexHelper netexHelper;
+    private final String targetEntity;
 
-    public OsmToNetexTransformer(NetexHelper netexHelper) {
+    public OsmToNetexTransformer(NetexHelper netexHelper, String targetEntity) {
         this.netexHelper = netexHelper;
+        this.targetEntity = targetEntity;
     }
 
     public void transform(String file, String netexOutputFile) throws JAXBException, FileNotFoundException, ClassNotFoundException {
@@ -42,10 +44,9 @@ public class OsmToNetexTransformer {
 
         SiteFrame siteFrame = netexHelper.createSiteFrame();
 
-        final String className = "TopographicPlace";
 
 
-        Class<? extends Zone_VersionStructure> clazz = validateAndGetDestinationClass(className);
+        Class<? extends Zone_VersionStructure> clazz = validateAndGetDestinationClass(targetEntity);
 
         map(osm, siteFrame, clazz);
 

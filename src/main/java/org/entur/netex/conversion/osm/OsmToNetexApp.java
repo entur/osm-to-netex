@@ -17,18 +17,21 @@ package org.entur.netex.conversion.osm;
 
 import org.apache.commons.cli.*;
 import org.rutebanken.netex.model.ObjectFactory;
+import org.rutebanken.netex.model.TariffZone;
 
 public class OsmToNetexApp {
 
     public static final String OSM_FILE = "osmFile";
     public static final String NETEX_OUTPUT_FILE = "netexOutputFile";
     public static final String NETEX_OUTPUT_FILE_DEFAULT_VALUE = "netex.xml";
+    public static final String TARGET_ENTITY = "targetEntity";
 
     public static void main(String[] args) throws Exception {
 
         Options options = new Options();
         options.addOption(OSM_FILE, true, "Osm file to convert from");
         options.addOption(NETEX_OUTPUT_FILE, true, "Netex file name to write");
+        options.addOption(TARGET_ENTITY, true, "Target entity. TariffZone or TopographicPlace");
 
 
         CommandLineParser parser = new DefaultParser();
@@ -45,7 +48,10 @@ public class OsmToNetexApp {
             ObjectFactory netexObjectFactory = new ObjectFactory();
             NetexHelper netexHelper = new NetexHelper(netexObjectFactory);
 
-            OsmToNetexTransformer osmToNetexTransformer = new OsmToNetexTransformer(netexHelper);
+
+            String targetEntity = cmd.getOptionValue(TARGET_ENTITY, TariffZone.class.getSimpleName());
+
+            OsmToNetexTransformer osmToNetexTransformer = new OsmToNetexTransformer(netexHelper, targetEntity);
             osmToNetexTransformer.transform(osmFile, netexOutputFile);
         } catch(UnrecognizedOptionException e) {
             System.err.println(e.getMessage());

@@ -44,7 +44,7 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
                 .stream()
                 .map(way -> mapWayToZone(way, mapOfNodes, clazz))
                 .collect(Collectors.toList());
-        logger.info("Mapped {} zones of type {} from osm to netex", zones.size());
+        logger.info("Mapped {} zones of type {} from osm to netex", zones.size(), clazz);
         return zones;
     }
 
