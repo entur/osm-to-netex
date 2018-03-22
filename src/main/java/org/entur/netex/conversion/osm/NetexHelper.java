@@ -69,6 +69,11 @@ public class NetexHelper {
         SiteFrame siteFrame = new SiteFrame();
         siteFrame.setVersion("1");
         siteFrame.setId("OSM:SiteFrame:" + System.currentTimeMillis());
+        siteFrame.withFrameDefaults(
+                new VersionFrameDefaultsStructure()
+                    .withDefaultLocale(
+                            new LocaleStructure()
+                                    .withTimeZone("Europe/Paris")));
         return siteFrame;
     }
 }
