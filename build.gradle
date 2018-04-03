@@ -16,7 +16,7 @@ def mainClass = "org.entur.netex.conversion.osm.OsmToNetexApp"
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
-    compile group: 'org.entur', name: 'netex-java-model', version: '1.0.7'
+    compile group: 'org.entur', name: 'netex-java-model', version: '1.0.8'
     compile "javax.xml.bind:jaxb-api:${jaxbVersion}"
     compile "com.sun.xml.bind:jaxb-core:${jaxbVersion}"
     compile "com.sun.xml.bind:jaxb-impl:${jaxbVersion}"

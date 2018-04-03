@@ -25,6 +25,7 @@ import javax.xml.bind.Marshaller;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.UnknownHostException;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 public class NetexHelper {
@@ -46,7 +47,7 @@ public class NetexHelper {
     @SuppressWarnings("unchecked")
     public PublicationDeliveryStructure createPublicationDelivery(SiteFrame siteFrame) {
         PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure()
-                .withPublicationTimestamp(OffsetDateTime.now())
+                .withPublicationTimestamp(LocalDateTime.now())
                 .withDescription(new MultilingualString()
                         .withValue(generatePublicationDeliveryDescription()))
                 .withParticipantRef(OsmToNetexApp.class.getCanonicalName())
@@ -84,6 +85,7 @@ public class NetexHelper {
         SiteFrame siteFrame = new SiteFrame();
         siteFrame.setVersion("1");
         siteFrame.setId("OSM:SiteFrame:" + System.currentTimeMillis());
+        siteFrame.setCreated(LocalDateTime.now());
         siteFrame.withFrameDefaults(
                 new VersionFrameDefaultsStructure()
                         .withDefaultLocale(
