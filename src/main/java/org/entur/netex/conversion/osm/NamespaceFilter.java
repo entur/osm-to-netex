@@ -12,7 +12,6 @@ public class NamespaceFilter extends XMLFilterImpl {
         this.schema = schema;
     }
 
-
     @Override
     public void endElement(String uri, String localName, String qName)
             throws SAXException {

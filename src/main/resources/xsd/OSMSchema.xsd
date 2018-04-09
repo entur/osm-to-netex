@@ -6,14 +6,14 @@
 	<xs:element name="osm">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element ref="bounds"/> <!-- exactly once -->
 				<xs:element ref="node" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="way" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="bounds"/> <!-- exactly once -->
 				<xs:element ref="relation" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
 			<xs:attribute name="version" type="xs:float" fixed="0.6"/>
-			<xs:attribute name="generator" type="xs:string" fixed="CGImap 0.0.2"/>
-			<!-- <xs:attribute name="generator" type="xs:string"/> -->
+			<!--<xs:attribute name="generator" type="xs:string" fixed="CGImap 0.0.2"/>-->
+			<xs:attribute name="generator" type="xs:string"/>
 		</xs:complexType>
 	</xs:element>
 
@@ -31,15 +31,16 @@
 			<xs:sequence>
 				<xs:element ref="tag" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
-			<xs:attribute name="id" type="xs:unsignedLong"/>
+			<xs:attribute name="id" type="xs:long"/>
 			<xs:attribute name="lat" type="xs:double"/>
 			<xs:attribute name="lon" type="xs:double"/>
 			<xs:attribute name="user" type="xs:string"/>
-			<xs:attribute name="uid" type="xs:unsignedLong"/>
+			<xs:attribute name="uid" type="xs:long"/>
 			<xs:attribute name="visible" type="xs:boolean"/>
-			<xs:attribute name="version" type="xs:unsignedLong"/>
-			<xs:attribute name="changeset" type="xs:unsignedLong"/>
+			<xs:attribute name="version" type="xs:long"/>
+			<xs:attribute name="changeset" type="xs:long"/>
 			<xs:attribute name="timestamp" type="xs:dateTime"/>
+			<xs:attribute name="action" type="xs:string"/>
 		</xs:complexType>
 	</xs:element>
 
@@ -49,19 +50,20 @@
 				<xs:element ref="nd" minOccurs="2" maxOccurs="2000"/> <!-- /api/capabilities may change -->
 				<xs:element ref="tag" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
-			<xs:attribute name="id" type="xs:unsignedLong"/>
+			<xs:attribute name="id" type="xs:long"/>
 			<xs:attribute name="user" type="xs:string"/>
-			<xs:attribute name="uid" type="xs:unsignedLong"/>
+			<xs:attribute name="uid" type="xs:long"/>
 			<xs:attribute name="visible" type="xs:boolean"/>
-			<xs:attribute name="version" type="xs:unsignedLong"/>
-			<xs:attribute name="changeset" type="xs:unsignedLong"/>
+			<xs:attribute name="version" type="xs:long"/>
+			<xs:attribute name="changeset" type="xs:long"/>
 			<xs:attribute name="timestamp" type="xs:dateTime"/> <!-- Section 5.4 of ISO 8601 -->
+			<xs:attribute name="action" type="xs:string"/>
 		</xs:complexType>
 	</xs:element>
 
 	<xs:element name="nd">
 		<xs:complexType>
-			<xs:attribute name="ref" type="xs:unsignedLong"/>
+			<xs:attribute name="ref" type="xs:long"/>
 		</xs:complexType>
 	</xs:element>
 
@@ -78,12 +80,12 @@
 				<xs:element ref="member" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="tag" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
-			<xs:attribute name="id" type="xs:unsignedLong"/>
+			<xs:attribute name="id" type="xs:long"/>
 			<xs:attribute name="user" type="xs:string"/>
-			<xs:attribute name="uid" type="xs:unsignedLong"/>
+			<xs:attribute name="uid" type="xs:long"/>
 			<xs:attribute name="visible" type="xs:boolean"/>
-			<xs:attribute name="version" type="xs:unsignedLong"/>
-			<xs:attribute name="changeset" type="xs:unsignedLong"/>
+			<xs:attribute name="version" type="xs:long"/>
+			<xs:attribute name="changeset" type="xs:long"/>
 			<xs:attribute name="timestamp" type="xs:dateTime"/>
 		</xs:complexType>
 	</xs:element>
@@ -99,7 +101,7 @@
 					</xs:restriction>
 				</xs:simpleType>
 			</xs:attribute>
-			<xs:attribute name="ref" type="xs:unsignedLong"/>
+			<xs:attribute name="ref" type="xs:long"/>
 			<xs:attribute name="role" type="xs:string"/>
 		</xs:complexType>
 	</xs:element>

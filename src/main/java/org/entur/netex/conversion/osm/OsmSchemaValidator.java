@@ -36,4 +36,7 @@ public class OsmSchemaValidator {
         schema.newValidator().validate(source);
     }
 
+    public Schema getSchema() {
+        return schema;
+    }
 }

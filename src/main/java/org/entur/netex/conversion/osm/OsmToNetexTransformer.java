@@ -20,14 +20,18 @@ import org.openstreetmap.osm.Osm;
 import org.rutebanken.netex.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.XMLFilter;
+import org.xml.sax.XMLReader;
 
 import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.*;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.Source;
+import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
@@ -51,20 +55,13 @@ public class OsmToNetexTransformer {
         this.targetEntity = targetEntity;
     }
 
-    public void transform(String osmInputFile, String netexOutputFile) throws JAXBException, IOException, ClassNotFoundException, SAXException {
+    public void transform(String osmInputFile, String netexOutputFile) throws JAXBException, IOException, ClassNotFoundException, SAXException, ParserConfigurationException {
 
-        JAXBContext osmContext = JAXBContext.newInstance(Osm.class);
+        OsmUnmarshaller osmUnmarshaller = new OsmUnmarshaller(false);
+        InputSource osmInputSource = new InputSource(osmInputFile);
 
-        Unmarshaller osmContextUnmarshaller = osmContext.createUnmarshaller();
+        Osm osm = osmUnmarshaller.unmarshall(osmInputSource);
 
-        OsmSchemaValidator osmSchemaValidator = new OsmSchemaValidator();
-
-        Source osmSource = new StreamSource(new FileInputStream(new File(osmInputFile)));
-
-        osmSchemaValidator.validate(osmSource);
-
-        JAXBElement<Osm> osmJAXBElement = osmContextUnmarshaller.unmarshal(osmSource, Osm.class);
-        Osm osm = osmJAXBElement.getValue();
         logger.info("Unmarshalled OSM file. generator: {}, version: {}, nodes: {}, ways: {}",
                 osm.getGenerator(), osm.getVersion(), osm.getNode().size(), osm.getWay().size());
 
@@ -88,7 +85,7 @@ public class OsmToNetexTransformer {
         Map<BigInteger, Node> mapOfNodes = osm.getNode().stream()
                 .collect(Collectors.toMap(Node::getId
                         , node -> node));
-        logger.info("Found {} nodes from osm file", mapOfNodes.size());
+        logger.info("Mapped {} nodes from osm file", mapOfNodes.size());
 
         if (clazz.isAssignableFrom(TariffZone.class)) {
             OsmToNetexMapper<TariffZone> osmToNetexMapper = new OsmToNetexMapper<>(netexHelper);
