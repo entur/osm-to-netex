@@ -136,7 +136,7 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
     private void tagValueNotNull(String name, String value) {
 
         if (value == null) {
-            throw new IllegalArgumentException("Cannot map " + name + " from tag.");
+            throw new IllegalArgumentException("Cannot map '" + name + "' from tag. Value not present. Seems like there are no tags with name " + name);
         }
     }
 
