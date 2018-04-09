@@ -18,11 +18,15 @@ package org.entur.netex.conversion.osm;
 import org.apache.commons.cli.*;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.TariffZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Entry point for running.
  */
 public class OsmToNetexApp {
+
+    private static final Logger logger = LoggerFactory.getLogger(OsmToNetexApp.class);
 
     public static final String OSM_FILE = "osmFile";
     public static final String NETEX_OUTPUT_FILE = "netexOutputFile";
@@ -45,6 +49,8 @@ public class OsmToNetexApp {
                 printHelp(options);
                 System.exit(1);
             }
+
+            logger.info("got osm file: {}", osmFile);
 
             String netexOutputFile = cmd.getOptionValue(NETEX_OUTPUT_FILE, NETEX_OUTPUT_FILE_DEFAULT_VALUE);
 

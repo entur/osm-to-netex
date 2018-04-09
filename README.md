@@ -12,5 +12,5 @@ Using java 8 and gradle 4.6
 ## Build fatjar
 ```gradle fatJar```
 
-## Run from jar
+## Run from jar (fatJar)
 ```java -jar build/libs/osm-to-netex-all-1.0-SNAPSHOT.jar -osmFile osm.xml```

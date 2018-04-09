@@ -56,6 +56,8 @@ public class OsmToNetexTransformer {
 
         JAXBElement<Osm> osmJAXBElement = osmContextUnmarshaller.unmarshal(new StreamSource(new FileInputStream(new File(osmInputFile))), Osm.class);
         Osm osm = osmJAXBElement.getValue();
+        logger.info("Unmarshalled OSM file. generator: {}, version: {}, nodes: {}, ways: {}",
+                osm.getGenerator(), osm.getVersion(), osm.getNode().size(), osm.getWay().size());
 
         SiteFrame siteFrame = netexHelper.createSiteFrame();
 
