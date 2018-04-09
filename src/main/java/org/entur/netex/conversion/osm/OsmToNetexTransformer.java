@@ -20,17 +20,20 @@ import org.openstreetmap.osm.Osm;
 import org.rutebanken.netex.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import java.io.*;
 import java.math.BigInteger;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -48,13 +51,19 @@ public class OsmToNetexTransformer {
         this.targetEntity = targetEntity;
     }
 
-    public void transform(String osmInputFile, String netexOutputFile) throws JAXBException, FileNotFoundException, ClassNotFoundException {
+    public void transform(String osmInputFile, String netexOutputFile) throws JAXBException, IOException, ClassNotFoundException, SAXException {
 
         JAXBContext osmContext = JAXBContext.newInstance(Osm.class);
 
         Unmarshaller osmContextUnmarshaller = osmContext.createUnmarshaller();
 
-        JAXBElement<Osm> osmJAXBElement = osmContextUnmarshaller.unmarshal(new StreamSource(new FileInputStream(new File(osmInputFile))), Osm.class);
+        OsmSchemaValidator osmSchemaValidator = new OsmSchemaValidator();
+
+        Source osmSource = new StreamSource(new FileInputStream(new File(osmInputFile)));
+
+        osmSchemaValidator.validate(osmSource);
+
+        JAXBElement<Osm> osmJAXBElement = osmContextUnmarshaller.unmarshal(osmSource, Osm.class);
         Osm osm = osmJAXBElement.getValue();
         logger.info("Unmarshalled OSM file. generator: {}, version: {}, nodes: {}, ways: {}",
                 osm.getGenerator(), osm.getVersion(), osm.getNode().size(), osm.getWay().size());
