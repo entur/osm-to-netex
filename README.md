@@ -1,4 +1,6 @@
 # osm-to-netex
+[![CircleCI](https://circleci.com/gh/entur/tiamat.svg?style=svg)](https://circleci.com/gh/entur/tiamat)
+
 Tool for converting OSM XML to NeTex XML
 
 Using java 8 and gradle 4.6
