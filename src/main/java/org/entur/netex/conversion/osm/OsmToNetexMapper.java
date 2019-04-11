@@ -22,6 +22,8 @@ import net.opengis.gml._3.PolygonType;
 import org.openstreetmap.osm.Node;
 import org.openstreetmap.osm.Tag;
 import org.openstreetmap.osm.Way;
+import org.rutebanken.netex.model.KeyListStructure;
+import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.Zone_VersionStructure;
 import org.slf4j.Logger;
@@ -52,6 +54,7 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
      * Reference, which is the postfix of the generated Netex ID
      */
     public static final String REFERENCE = "reference";
+    public static final String ZONE_TYPE = "zone_type";
     public static final String DEFAULT_VERSION = "1";
     private static final Logger logger = LoggerFactory.getLogger(OsmToNetexTransformer.class);
     private static final net.opengis.gml._3.ObjectFactory openGisObjectFactory = new net.opengis.gml._3.ObjectFactory();
@@ -115,6 +118,14 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
                 zone.setName(new MultilingualString().withValue(tag.getV()).withLang(lang));
             } else if (tag.getK().startsWith(REFERENCE)) {
                 reference = tag.getV();
+            } else if (tag.getK().startsWith(ZONE_TYPE)) {
+                String keyName = tag.getK();
+                String value = tag.getV();
+                tagValueNotNull(ZONE_TYPE,value);
+
+                KeyValueStructure keyValueStructure = new KeyValueStructure().withKey(keyName).withValue(value);
+                KeyListStructure keyListStructure = new KeyListStructure().withKeyValue(keyValueStructure);
+                zone.setKeyList(keyListStructure);
             }
         }
 
