@@ -38,6 +38,7 @@ import javax.xml.validation.SchemaFactory;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -89,11 +90,20 @@ public class OsmToNetexTransformer {
 
         if (clazz.isAssignableFrom(TariffZone.class)) {
             OsmToNetexMapper<TariffZone> osmToNetexMapper = new OsmToNetexMapper<>(netexHelper);
-            List<TariffZone> tariffZones = osmToNetexMapper.mapWaysToZoneList(osm.getWay(), mapOfNodes, TariffZone.class);
+            List<JAXBElement<? extends Zone_VersionStructure>> tariffZones = osmToNetexMapper.mapWaysToZoneList(osm.getWay(), mapOfNodes, TariffZone.class).stream()
+                    .map(tariffZone -> new ObjectFactory().createTariffZone(tariffZone)).collect(Collectors.toList());
             siteFrame.withTariffZones(
                     new TariffZonesInFrame_RelStructure()
                             .withTariffZone(tariffZones));
-        } else if (clazz.isAssignableFrom(TopographicPlace.class)) {
+        } else if (clazz.isAssignableFrom(FareZone.class)) {
+            OsmToNetexMapper<FareZone> osmToNetexMapper = new OsmToNetexMapper<>(netexHelper);
+            List<JAXBElement<? extends Zone_VersionStructure>> fareZones = osmToNetexMapper.mapWaysToZoneList(osm.getWay(), mapOfNodes, FareZone.class).stream()
+                    .map(fareZone -> new ObjectFactory().createFareZone(fareZone)).collect(Collectors.toList());
+
+            siteFrame.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(fareZones));
+
+        }
+        else if (clazz.isAssignableFrom(TopographicPlace.class)) {
             OsmToNetexMapper<TopographicPlace> osmToNetexMapper = new OsmToNetexMapper<>(netexHelper);
             List<TopographicPlace> topographicPlaces = osmToNetexMapper.mapWaysToZoneList(osm.getWay(), mapOfNodes, TopographicPlace.class);
             topographicPlaces.forEach(tp -> tp.setDescriptor(new TopographicPlaceDescriptor_VersionedChildStructure().withName(tp.getName())));

@@ -38,7 +38,7 @@ public class OsmToNetexApp {
         Options options = new Options();
         options.addOption(OSM_FILE, true, "Osm file to convert from");
         options.addOption(NETEX_OUTPUT_FILE, true, "Netex file name to write");
-        options.addOption(TARGET_ENTITY, true, "Target entity. TariffZone or TopographicPlace");
+        options.addOption(TARGET_ENTITY, true, "Target entity. TariffZone, FareZone or TopographicPlace");
 
 
         CommandLineParser parser = new DefaultParser();
@@ -58,7 +58,7 @@ public class OsmToNetexApp {
             NetexHelper netexHelper = new NetexHelper(netexObjectFactory);
 
 
-            String targetEntity = cmd.getOptionValue(TARGET_ENTITY, TariffZone.class.getSimpleName());
+            String targetEntity = cmd.getOptionValue(TARGET_ENTITY);
 
             OsmToNetexTransformer osmToNetexTransformer = new OsmToNetexTransformer(netexHelper, targetEntity);
             osmToNetexTransformer.transform(osmFile, netexOutputFile);

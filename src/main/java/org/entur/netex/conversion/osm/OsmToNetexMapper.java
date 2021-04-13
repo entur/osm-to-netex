@@ -22,14 +22,35 @@ import net.opengis.gml._3.PolygonType;
 import org.openstreetmap.osm.Node;
 import org.openstreetmap.osm.Tag;
 import org.openstreetmap.osm.Way;
+import org.rutebanken.netex.model.AuthorityRefStructure;
+import org.rutebanken.netex.model.FareZone;
+import org.rutebanken.netex.model.FareZoneRefStructure;
+import org.rutebanken.netex.model.FareZoneRefs_RelStructure;
 import org.rutebanken.netex.model.KeyListStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.netex.model.MultilingualString;
+import org.rutebanken.netex.model.ObjectFactory;
+import org.rutebanken.netex.model.OrganisationRefStructure;
+import org.rutebanken.netex.model.PointRefStructure;
+import org.rutebanken.netex.model.PointRefs_RelStructure;
+import org.rutebanken.netex.model.PrivateCodeStructure;
+import org.rutebanken.netex.model.ScheduledStopPointRefStructure;
+import org.rutebanken.netex.model.ScopingMethodEnumeration;
+import org.rutebanken.netex.model.ValidBetween;
+import org.rutebanken.netex.model.ZoneTopologyEnumeration;
 import org.rutebanken.netex.model.Zone_VersionStructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.xml.bind.JAXBElement;
 import java.math.BigInteger;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -53,9 +74,35 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
     /**
      * Reference, which is the postfix of the generated Netex ID
      */
-    public static final String REFERENCE = "reference";
-    public static final String ZONE_TYPE = "zone_type";
+    public static final String REFERENCE = "reference";  //privatecode
+    public static final String ZONE_TYPE = "zone_type";  //scoping method
     public static final String DEFAULT_VERSION = "1";
+    public static final String VALID_FROM = "valid_from";
+    public static final String FAREZONEID = "id";
+    public static final String AUTHORITYREF = "authorityRef";
+    public static final String MEMBERS = "members";
+    public static final String NEIGHBOURS = "neighbours";
+    public static final String PRIVATECODE = "privateCode";
+    public static final String SCOPINGMETHOD = "scopingMethod";
+    public static final String TARIFFZONETYPE ="tariffZone";
+    public static final String ZONETOPOLOGY ="zoneTopology";
+
+
+    /*
+    <tag k='area' v='tariffZone' />
+    <tag k='authorityRef' v='VOT:Authority:VTFK_ID' />**
+    <tag k='codespace' v='VOT' />  **
+    <tag k='id' v='VOT:FareZone:19' /> **
+    <tag k='members' v='NSR:StopPlace:16845;NSR:StopPlace:16848' /> **
+    <tag k='name:nor' v='Kongsberg' /> **
+    <tag k='neighbours' v='VOT:FareZone:17;VOT:FareZone:14' /> **
+    <tag k='privateCode' v='630' /> **
+    <tag k='scopingMethod' v='explicit' />**
+    <tag k='tariffZone' v='fareZone' />
+    <tag k='valid_from' v='2021-02-01' />**
+    <tag k='zoneTopology' v='tiled' />**
+     */
+
     private static final Logger logger = LoggerFactory.getLogger(OsmToNetexTransformer.class);
     private static final net.opengis.gml._3.ObjectFactory openGisObjectFactory = new net.opengis.gml._3.ObjectFactory();
     private final NetexHelper netexHelper;
@@ -78,12 +125,109 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
         T zone = netexHelper.createNetexObject(clazz);
 
         zone.setVersion(DEFAULT_VERSION);
-
-        mapTags(way.getTag(), zone, clazz.getSimpleName());
+    
+        if (clazz.getSimpleName().equals("FareZone")){
+            mapFareZoneTags(way.getTag(), (FareZone) zone, clazz.getSimpleName());
+            
+        } else {
+            mapTags(way.getTag(), zone, clazz.getSimpleName());
+        }
 
         zone.setPolygon(mapNodes(way, mapOfNodes));
 
         return zone;
+    }
+
+    private void mapFareZoneTags(List<Tag> tags, FareZone zone, String className) {
+         /*
+    <tag k='area' v='tariffZone' />
+    <tag k='authorityRef' v='VOT:Authority:VTFK_ID' />**
+    <tag k='codespace' v='VOT' />  **
+    <tag k='id' v='VOT:FareZone:19' /> **
+    <tag k='members' v='NSR:StopPlace:16845;NSR:StopPlace:16848' /> **
+    <tag k='name:nor' v='Kongsberg' /> **
+    <tag k='neighbours' v='VOT:FareZone:17;VOT:FareZone:14' /> **
+    <tag k='privateCode' v='630' /> **
+    <tag k='scopingMethod' v='explicit' />**
+    <tag k='tariffZone' v='fareZone' />
+    <tag k='valid_from' v='2021-02-01' />**
+    <tag k='zoneTopology' v='tiled' />**
+     */
+        String codespace = null;
+        String fareZoneId = null;
+        String authorityRef = null;
+
+
+        for (Tag tag : tags) {
+
+            if (tag.getK().equals(CODESPACE)) {
+                codespace = tag.getV();
+            } else if (tag.getK().startsWith(NAME)) {
+                String keyName = tag.getK();
+                String lang = extractLangFromNameTagKey(keyName);
+                zone.setName(new MultilingualString().withValue(tag.getV()).withLang(lang));
+            } else if (tag.getK().startsWith(AUTHORITYREF)) {
+                authorityRef = tag.getV();
+                zone.withTransportOrganisationRef(new ObjectFactory().createAuthorityRef(new AuthorityRefStructure().withRef(authorityRef)));
+            } else if (tag.getK().startsWith(PRIVATECODE)) {
+                final String value = tag.getV();
+                tagValueNotNull(PRIVATECODE,value);
+                zone.withPrivateCode(new PrivateCodeStructure().withValue(value));
+            } else if (tag.getK().startsWith(ZONETOPOLOGY)) {
+                String value = tag.getV();
+                tagValueNotNull(ZONETOPOLOGY, value);
+                zone.withZoneTopology(ZoneTopologyEnumeration.fromValue(value));
+            } else if (tag.getK().startsWith(SCOPINGMETHOD)) {
+                final String value = tag.getV();
+                tagValueNotNull(SCOPINGMETHOD, value);
+                final ScopingMethodEnumeration scopingMethodEnumeration = ScopingMethodEnumeration.fromValue(value);
+                zone.withScopingMethod(scopingMethodEnumeration);
+
+            } else if (tag.getK().startsWith(MEMBERS)) {
+                final String value = tag.getV();
+                tagValueNotNull(MEMBERS, value);
+                final String[] stopPlaces = value.split(";");
+                List<JAXBElement<? extends PointRefStructure>> stopPoints = Arrays.stream(stopPlaces)
+                        .map(stopPlace -> new ObjectFactory().createScheduledStopPointRef(new ScheduledStopPointRefStructure().withRef(stopPlace)))
+                        .collect(Collectors.toList());
+                if (!stopPoints.isEmpty()) {
+                    zone.withMembers(new PointRefs_RelStructure().withPointRef(stopPoints));
+                }
+            } else if (tag.getK().startsWith(NEIGHBOURS)) {
+                final String value = tag.getV();
+                tagValueNotNull(NEIGHBOURS, value);
+                final String[] neighbours = value.split(";");
+                final List<FareZoneRefStructure> fareZoneRefs = Arrays.stream(neighbours)
+                        .map(farezone -> new FareZoneRefStructure().withRef(farezone))
+                        .collect(Collectors.toList());
+
+                if (!fareZoneRefs.isEmpty()) {
+                    zone.withNeighbours(new FareZoneRefs_RelStructure().withFareZoneRef(fareZoneRefs));
+                }
+
+            } else if (tag.getK().equals(VALID_FROM)) {
+                String validFrom = tag.getV();
+                tagValueNotNull(VALID_FROM, validFrom);
+
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                try {
+                    Instant instant = sdf.parse(validFrom).toInstant();
+                    final LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+                    zone.withValidBetween(new ValidBetween().withFromDate(localDateTime));
+                } catch (ParseException e) {
+                    logger.info("Unable to parse and set valid from date: {}", e.getMessage());
+                }
+
+            } else if (tag.getK().startsWith(FAREZONEID)) {
+                fareZoneId =tag.getV();
+            }
+        }
+
+        tagValueNotNull(CODESPACE, codespace);
+        tagValueNotNull(FAREZONEID,fareZoneId);
+
+
+        zone.setId(fareZoneId);
     }
 
     private PolygonType mapNodes(Way way, Map<BigInteger, Node> mapOfNodes) {
@@ -126,6 +270,19 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
                 KeyValueStructure keyValueStructure = new KeyValueStructure().withKey(keyName).withValue(value);
                 KeyListStructure keyListStructure = new KeyListStructure().withKeyValue(keyValueStructure);
                 zone.setKeyList(keyListStructure);
+            } else if (tag.getK().equals(VALID_FROM)) {
+                String validFrom = tag.getV();
+                tagValueNotNull(VALID_FROM,validFrom);
+
+                SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+                try {
+                    Instant instant = sdf.parse(validFrom).toInstant();
+                    final LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+                    zone.withValidBetween(new ValidBetween().withFromDate(localDateTime));
+                } catch (ParseException e) {
+                    logger.info("Unable to parse and set valid from date: {}",e.getMessage());
+                }
+
             }
         }
 
