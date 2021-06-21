@@ -36,6 +36,7 @@ import org.rutebanken.netex.model.PointRefs_RelStructure;
 import org.rutebanken.netex.model.PrivateCodeStructure;
 import org.rutebanken.netex.model.ScheduledStopPointRefStructure;
 import org.rutebanken.netex.model.ScopingMethodEnumeration;
+import org.rutebanken.netex.model.TariffZone;
 import org.rutebanken.netex.model.ValidBetween;
 import org.rutebanken.netex.model.ZoneTopologyEnumeration;
 import org.rutebanken.netex.model.Zone_VersionStructure;
@@ -86,6 +87,7 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
     public static final String SCOPINGMETHOD = "scopingMethod";
     public static final String TARIFFZONETYPE ="tariffZone";
     public static final String ZONETOPOLOGY ="zoneTopology";
+    public static final String TZMAPPING ="tzMapping";
 
 
     /*
@@ -127,7 +129,7 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
         zone.setVersion(DEFAULT_VERSION);
     
         if (clazz.getSimpleName().equals("FareZone")){
-            mapFareZoneTags(way.getTag(), (FareZone) zone, clazz.getSimpleName());
+            mapFareZoneTags(way.getTag(), (FareZone) zone);
             
         } else {
             mapTags(way.getTag(), zone, clazz.getSimpleName());
@@ -138,7 +140,7 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
         return zone;
     }
 
-    private void mapFareZoneTags(List<Tag> tags, FareZone zone, String className) {
+    private void mapFareZoneTags(List<Tag> tags, FareZone zone) {
          /*
     <tag k='area' v='tariffZone' />
     <tag k='authorityRef' v='VOT:Authority:VTFK_ID' />**
@@ -155,7 +157,8 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
      */
         String codespace = null;
         String fareZoneId = null;
-        String authorityRef = null;
+        String privateCode = null;
+        String tzMapping = null;
 
 
         for (Tag tag : tags) {
@@ -167,12 +170,11 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
                 String lang = extractLangFromNameTagKey(keyName);
                 zone.setName(new MultilingualString().withValue(tag.getV()).withLang(lang));
             } else if (tag.getK().startsWith(AUTHORITYREF)) {
-                authorityRef = tag.getV();
+                String authorityRef = tag.getV();
+                tagValueNotNull(AUTHORITYREF,authorityRef);
                 zone.withTransportOrganisationRef(new ObjectFactory().createAuthorityRef(new AuthorityRefStructure().withRef(authorityRef)));
             } else if (tag.getK().startsWith(PRIVATECODE)) {
-                final String value = tag.getV();
-                tagValueNotNull(PRIVATECODE,value);
-                zone.withPrivateCode(new PrivateCodeStructure().withValue(value));
+                privateCode = tag.getV();
             } else if (tag.getK().startsWith(ZONETOPOLOGY)) {
                 String value = tag.getV();
                 tagValueNotNull(ZONETOPOLOGY, value);
@@ -220,14 +222,27 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
 
             } else if (tag.getK().startsWith(FAREZONEID)) {
                 fareZoneId =tag.getV();
+            } else if (tag.getK().startsWith(TZMAPPING)) {
+                tzMapping = tag.getV();
             }
         }
 
         tagValueNotNull(CODESPACE, codespace);
         tagValueNotNull(FAREZONEID,fareZoneId);
-
-
+        tagValueNotNull(PRIVATECODE,privateCode);
+        zone.withPrivateCode(new PrivateCodeStructure().withValue(privateCode));
+        generateOrSetTzMapping(zone,tzMapping,privateCode,codespace);
         zone.setId(fareZoneId);
+    }
+
+    private void generateOrSetTzMapping(FareZone zone, String tariffZoneRef, String privateCode, String codespace) {
+        if (tariffZoneRef == null) {
+            tariffZoneRef = codespace + ":" + TariffZone.class.getSimpleName() + ":" + privateCode;
+        }
+        KeyValueStructure keyValueStructure = new KeyValueStructure().withKey(TZMAPPING).withValue(tariffZoneRef);
+        KeyListStructure keyListStructure = new KeyListStructure().withKeyValue(keyValueStructure);
+        zone.setKeyList(keyListStructure);
+
     }
 
     private PolygonType mapNodes(Way way, Map<BigInteger, Node> mapOfNodes) {
