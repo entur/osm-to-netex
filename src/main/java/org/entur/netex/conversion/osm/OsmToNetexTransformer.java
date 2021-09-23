@@ -63,8 +63,8 @@ public class OsmToNetexTransformer {
 
         Osm osm = osmUnmarshaller.unmarshall(osmInputSource);
 
-        logger.info("Unmarshalled OSM file. generator: {}, version: {}, nodes: {}, ways: {}",
-                osm.getGenerator(), osm.getVersion(), osm.getNode().size(), osm.getWay().size());
+        logger.info("Unmarshalled OSM file. generator: {}, version: {}, nodes: {}, ways: {}, relations: {}",
+                osm.getGenerator(), osm.getVersion(), osm.getNode().size(), osm.getWay().size(), osm.getRelation().size());
 
         SiteFrame siteFrame = netexHelper.createSiteFrame();
 
@@ -83,6 +83,14 @@ public class OsmToNetexTransformer {
 
     public void map(Osm osm, SiteFrame siteFrame, Class<? extends Zone_VersionStructure> clazz) {
 
+        /*
+         * 1. Parse relations to collect ways first
+         * 2. Parse ways to collect nodes first
+         * 3. Parse nodes and ways
+         */
+
+        osm.getRelation().stream().map(rel -> rel.getMember());
+
         Map<BigInteger, Node> mapOfNodes = osm.getNode().stream()
                 .collect(Collectors.toMap(Node::getId
                         , node -> node));
@@ -90,22 +98,33 @@ public class OsmToNetexTransformer {
 
         if (clazz.isAssignableFrom(TariffZone.class)) {
             OsmToNetexMapper<TariffZone> osmToNetexMapper = new OsmToNetexMapper<>(netexHelper);
-            List<JAXBElement<? extends Zone_VersionStructure>> tariffZones = osmToNetexMapper.mapWaysToZoneList(osm.getWay(), mapOfNodes, TariffZone.class).stream()
+
+            final List<Map<BigInteger, TariffZone>> maps = osmToNetexMapper.mapWaysToZoneList(osm.getWay(), mapOfNodes, TariffZone.class);
+            List<TariffZone> tariffZones= maps.stream().flatMap(map -> map.values().stream()).collect(Collectors.toList());
+
+            List<JAXBElement<? extends Zone_VersionStructure>> tariffZones1 = tariffZones.stream()
                     .map(tariffZone -> new ObjectFactory().createTariffZone(tariffZone)).collect(Collectors.toList());
             siteFrame.withTariffZones(
                     new TariffZonesInFrame_RelStructure()
-                            .withTariffZone(tariffZones));
+                            .withTariffZone(tariffZones1));
         } else if (clazz.isAssignableFrom(FareZone.class)) {
             OsmToNetexMapper<FareZone> osmToNetexMapper = new OsmToNetexMapper<>(netexHelper);
-            List<JAXBElement<? extends Zone_VersionStructure>> fareZones = osmToNetexMapper.mapWaysToZoneList(osm.getWay(), mapOfNodes, FareZone.class).stream()
+            final List<Map<BigInteger,FareZone>> fareZoneMaps = osmToNetexMapper.mapWaysToZoneList(osm.getWay(), mapOfNodes, FareZone.class);
+            List<FareZone> fareZones = fareZoneMaps.stream().flatMap(map -> map.values().stream()).collect(Collectors.toList());
+            List<JAXBElement<? extends Zone_VersionStructure>> fareZones1 = fareZones.stream()
                     .map(fareZone -> new ObjectFactory().createFareZone(fareZone)).collect(Collectors.toList());
 
-            siteFrame.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(fareZones));
+            siteFrame.withTariffZones(new TariffZonesInFrame_RelStructure().withTariffZone(fareZones1));
 
+            // Group of TariffZones
+
+            List<GroupOfTariffZones> groupOfTariffZones =osmToNetexMapper.mapRelationsToGroupOfTariffZones(osm.getRelation(),fareZoneMaps);
+            siteFrame.withGroupsOfTariffZones(new GroupsOfTariffZonesInFrame_RelStructure().withGroupOfTariffZones(groupOfTariffZones));
         }
         else if (clazz.isAssignableFrom(TopographicPlace.class)) {
             OsmToNetexMapper<TopographicPlace> osmToNetexMapper = new OsmToNetexMapper<>(netexHelper);
-            List<TopographicPlace> topographicPlaces = osmToNetexMapper.mapWaysToZoneList(osm.getWay(), mapOfNodes, TopographicPlace.class);
+            List<Map<BigInteger,TopographicPlace>> topographicPlacesMap = osmToNetexMapper.mapWaysToZoneList(osm.getWay(), mapOfNodes, TopographicPlace.class);
+            List<TopographicPlace> topographicPlaces = topographicPlacesMap.stream().flatMap(tp -> tp.values().stream()).collect(Collectors.toList());
             topographicPlaces.forEach(tp -> tp.setDescriptor(new TopographicPlaceDescriptor_VersionedChildStructure().withName(tp.getName())));
             siteFrame.withTopographicPlaces(
                     new TopographicPlacesInFrame_RelStructure()

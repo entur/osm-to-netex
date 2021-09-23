@@ -19,13 +19,16 @@ import net.opengis.gml._3.AbstractRingPropertyType;
 import net.opengis.gml._3.DirectPositionListType;
 import net.opengis.gml._3.LinearRingType;
 import net.opengis.gml._3.PolygonType;
+import org.openstreetmap.osm.Member;
 import org.openstreetmap.osm.Node;
+import org.openstreetmap.osm.Relation;
 import org.openstreetmap.osm.Tag;
 import org.openstreetmap.osm.Way;
 import org.rutebanken.netex.model.AuthorityRefStructure;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.FareZoneRefStructure;
 import org.rutebanken.netex.model.FareZoneRefs_RelStructure;
+import org.rutebanken.netex.model.GroupOfTariffZones;
 import org.rutebanken.netex.model.KeyListStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.netex.model.MultilingualString;
@@ -34,9 +37,12 @@ import org.rutebanken.netex.model.OrganisationRefStructure;
 import org.rutebanken.netex.model.PointRefStructure;
 import org.rutebanken.netex.model.PointRefs_RelStructure;
 import org.rutebanken.netex.model.PrivateCodeStructure;
+import org.rutebanken.netex.model.PurposeOfGroupingRefStructure;
 import org.rutebanken.netex.model.ScheduledStopPointRefStructure;
 import org.rutebanken.netex.model.ScopingMethodEnumeration;
 import org.rutebanken.netex.model.TariffZone;
+import org.rutebanken.netex.model.TariffZoneRef;
+import org.rutebanken.netex.model.TariffZoneRefs_RelStructure;
 import org.rutebanken.netex.model.ValidBetween;
 import org.rutebanken.netex.model.ZoneTopologyEnumeration;
 import org.rutebanken.netex.model.Zone_VersionStructure;
@@ -52,6 +58,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -113,8 +121,8 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
         this.netexHelper = netexHelper;
     }
 
-    public List<T> mapWaysToZoneList(List<Way> ways, Map<BigInteger, Node> mapOfNodes, Class<T> clazz) {
-        List<T> zones = ways
+    public List<Map<BigInteger,T>> mapWaysToZoneList(List<Way> ways, Map<BigInteger, Node> mapOfNodes, Class<T> clazz) {
+        List<Map<BigInteger,T>> zones = ways
                 .stream()
                 .map(way -> mapWayToZone(way, mapOfNodes, clazz))
                 .collect(Collectors.toList());
@@ -122,7 +130,8 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
         return zones;
     }
 
-    public T mapWayToZone(Way way, Map<BigInteger, Node> mapOfNodes, Class<T> clazz) {
+    public Map<BigInteger, T> mapWayToZone(Way way, Map<BigInteger, Node> mapOfNodes, Class<T> clazz) {
+        Map<BigInteger,T> map= new HashMap<>();
 
         T zone = netexHelper.createNetexObject(clazz);
 
@@ -137,7 +146,8 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
 
         zone.setPolygon(mapNodes(way, mapOfNodes));
 
-        return zone;
+            map.put(way.getId(),zone);
+        return map;
     }
 
     private void mapFareZoneTags(List<Tag> tags, FareZone zone) {
@@ -323,4 +333,62 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
         }
     }
 
+    public List<GroupOfTariffZones> mapRelationsToGroupOfTariffZones(List<Relation> relations, List<Map<BigInteger, T>> fareZoneMaps) {
+       return relations.stream()
+                .map(rel -> mapRelationToGroupOfTariffZones(rel,fareZoneMaps))
+                .collect(Collectors.toList());
+    }
+
+    private GroupOfTariffZones mapRelationToGroupOfTariffZones(Relation relation, List<Map<BigInteger,T>> fareZoneMaps) {
+        final GroupOfTariffZones groupOfTariffZones = new ObjectFactory().createGroupOfTariffZones();
+        mapRelationTags(relation.getTag(),groupOfTariffZones);
+
+        List<TariffZoneRef> tariffZoneRefs = new ArrayList<>();
+
+        final Map<BigInteger, String> wayIdFareZoneIds = fareZoneMaps.stream()
+                .flatMap(m -> m.entrySet().stream())
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getId()));
+
+        final List<BigInteger> members = relation.getMember().stream().map(Member::getRef).collect(Collectors.toList());
+
+        for (BigInteger member : members) {
+            final String fareZoneId = wayIdFareZoneIds.get(member);
+            final TariffZoneRef tariffZoneRef = new TariffZoneRef().withRef(fareZoneId).withVersion("1");
+            tariffZoneRefs.add(tariffZoneRef);
+        }
+
+        groupOfTariffZones.withMembers(new TariffZoneRefs_RelStructure().withTariffZoneRef(tariffZoneRefs))  ;
+
+
+
+        return groupOfTariffZones;
+    }
+
+    private void mapRelationTags(List<Tag> tags, GroupOfTariffZones groupOfTariffZones) {
+
+        String groupOfTariffZoneId = null;
+        String privateCode = null;
+        String purposeOfGroupingRef = null;
+
+        for(Tag tag :tags) {
+            if (tag.getK().equals("id")) {
+                groupOfTariffZoneId = tag.getV();
+            } else if (tag.getK().startsWith(NAME)) {
+                String keyName = tag.getK();
+                String lang = extractLangFromNameTagKey(keyName);
+                groupOfTariffZones.setName(new MultilingualString().withValue(tag.getV()).withLang(lang));
+            } else if (tag.getK().startsWith(PRIVATECODE)) {
+                privateCode = tag.getV();
+            } else if (tag.getK().startsWith("PurposeOfGroupingRef")) {
+                purposeOfGroupingRef = tag.getV();
+            }
+        }
+            tagValueNotNull("id",groupOfTariffZoneId);
+
+            groupOfTariffZones.setId(groupOfTariffZoneId);
+            groupOfTariffZones.withPrivateCode(new PrivateCodeStructure().withValue(privateCode));
+            groupOfTariffZones.setPurposeOfGroupingRef(new PurposeOfGroupingRefStructure().withRef(purposeOfGroupingRef));
+            groupOfTariffZones.setVersion("1");
+
+    }
 }
