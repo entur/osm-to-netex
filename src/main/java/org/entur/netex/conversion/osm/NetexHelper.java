@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.UnknownHostException;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 
 public class NetexHelper {
 

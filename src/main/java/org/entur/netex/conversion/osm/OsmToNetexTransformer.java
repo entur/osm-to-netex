@@ -89,8 +89,6 @@ public class OsmToNetexTransformer {
          * 3. Parse nodes and ways
          */
 
-        osm.getRelation().stream().map(rel -> rel.getMember());
-
         Map<BigInteger, Node> mapOfNodes = osm.getNode().stream()
                 .collect(Collectors.toMap(Node::getId
                         , node -> node));
@@ -118,8 +116,11 @@ public class OsmToNetexTransformer {
 
             // Group of TariffZones
 
-            List<GroupOfTariffZones> groupOfTariffZones =osmToNetexMapper.mapRelationsToGroupOfTariffZones(osm.getRelation(),fareZoneMaps);
-            siteFrame.withGroupsOfTariffZones(new GroupsOfTariffZonesInFrame_RelStructure().withGroupOfTariffZones(groupOfTariffZones));
+            if(osm.getRelation() != null && !osm.getRelation().isEmpty())  {
+
+                List<GroupOfTariffZones> groupOfTariffZones =osmToNetexMapper.mapRelationsToGroupOfTariffZones(osm.getRelation(),fareZoneMaps);
+                siteFrame.withGroupsOfTariffZones(new GroupsOfTariffZonesInFrame_RelStructure().withGroupOfTariffZones(groupOfTariffZones));
+            }
         }
         else if (clazz.isAssignableFrom(TopographicPlace.class)) {
             OsmToNetexMapper<TopographicPlace> osmToNetexMapper = new OsmToNetexMapper<>(netexHelper);
