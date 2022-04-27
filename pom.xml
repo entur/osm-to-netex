@@ -10,8 +10,8 @@
   <description>Converts osm files to netex files</description>
 
   <scm>
-    <connection>scm:git:ssh://git@github.com:entur/asag.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com:entur/asag.git</developerConnection>
+    <connection>scm:git:ssh://git@github.com:entur/osm-to-netex</connection>
+    <developerConnection>scm:git:ssh://git@github.com:entur/osm-to-netex</developerConnection>
   </scm>
 
   <distributionManagement>
@@ -88,6 +88,9 @@
                     <allowSnapshots>fasle</allowSnapshots>
                     <verbose>true</verbose>
                     <commitMessagePrefix>[ci skip]</commitMessagePrefix>
+                    <gitFlowConfig>
+                        <developmentBranch>master</developmentBranch>
+                    </gitFlowConfig>
                 </configuration>
             </plugin>
         </plugins>
