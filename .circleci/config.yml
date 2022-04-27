@@ -1,25 +1,92 @@
-# Java Gradle CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-java/ for more details
-#
-version: 2
-jobs:
-  build:
+version: 2.1
+
+orbs:
+  queue: eddiewebb/queue@volatile
+
+executors:
+  java:
     docker:
-      - image: circleci/openjdk:8-jdk
-    working_directory: ~/repo
+      - image: cimg/openjdk:11.0.13
+        auth:
+          username: $DOCKERHUB_LOGIN
+          password: $DOCKERHUB_PASSWORD
     environment:
-      JVM_OPTS: -Xmx3200m
+      _JAVA_OPTIONS: -Xms512M -Xmx1G
       TERM: dumb
+
+aliases:
+  - &release
+    name: Release
+    command: |
+      if [ "$(git log -n 1 --pretty="%an")" == "Renovate Bot" ]
+      then
+        echo "Skipping release"
+      else
+      echo "Start release"
+      git config --global user.email "circleci@entur.no"
+      git config --global user.name "circleci"
+      git checkout master
+      mvn gitflow:release-start gitflow:release-finish -DskipTests=true -Prelease -DpostReleaseGoals=deploy -DargLine='-Prelease -DskipTests' -B
+      fi
+  - &import_gpg_key
+    name: Configure GPG private key for signing project artifacts in OSS Sonatype
+    command: |
+      echo $SONATYPE_GPG_KEY_BASE64 | base64 --decode | gpg --batch --no-tty --import --yes
+  - &maven-settings-file
+      "\"<settings xsi:schemaLocation='http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd' xmlns='http://maven.apache.org/SETTINGS/1.1.0'
+                xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
+              <servers>
+                <server>
+                  <username>$SONATYPE_USERNAME</username>
+                  <password>$SONATYPE_PASSWORD</password>
+                  <id>ossrh</id>
+                </server>
+              </servers>
+            </settings>\""
+
+commands:
+  generate-maven-settings-file:
+    parameters:
+      settings-file:
+        type: string
+    steps:
+      - run:
+          name: Generate Maven Settings File
+          command: |
+            mkdir -p ~/.m2
+            echo -e << parameters.settings-file >> > ~/.m2/settings.xml
+jobs:
+  checkout-verify-deploy:
+    executor: java
     steps:
       - checkout
+      - generate-maven-settings-file
+          settings-file: *maven-settings-file
       - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "build.gradle" }}
-          - v1-dependencies-
-      - run: gradle dependencies
+          key: dep-cache-{{ checksum "pom.xml" }}
+      - run: mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:go-offline
       - save_cache:
           paths:
-            - ~/.gradle
-          key: v1-dependencies-{{ checksum "build.gradle" }}
-      - run: gradle test
+            - ~/.m2
+          key:  dep-cache-{{ checksum "pom.xml" }}
+      - run: mvn verify
+      - run: *import_gpg_key
+      - run: *release
+workflows:
+  checkout-verify-deploy:
+    jobs:
+      - queue/block_workflow:
+          time: '30'
+          circleci-api-key: CIRCLE_API_USER_TOKEN
+          context: global
+          filters:
+            branches:
+              only:
+                - master
+      - checkout-verify-deploy:
+          context: global
+          requires:
+            - queue/block_workflow
+          filters:
+            branches:
+              only: master

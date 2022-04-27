@@ -225,7 +225,7 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
                 try {
                     Instant instant = sdf.parse(validFrom).toInstant();
                     final LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
-                    zone.withValidBetween(new ValidBetween().withFromDate(localDateTime));
+                    //zone.withValidBetween(new ValidBetween().withFromDate(localDateTime));
                 } catch (ParseException e) {
                     logger.info("Unable to parse and set valid from date: {}", e.getMessage());
                 }
@@ -371,7 +371,7 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
         String purposeOfGroupingRef = null;
 
         for(Tag tag :tags) {
-            if (tag.getK().equals("id")) {
+            if (tag.getK().equals("GroupOfTariffZoneId")) {
                 groupOfTariffZoneId = tag.getV();
             } else if (tag.getK().startsWith(NAME)) {
                 String keyName = tag.getK();
@@ -383,7 +383,7 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
                 purposeOfGroupingRef = tag.getV();
             }
         }
-            tagValueNotNull("id",groupOfTariffZoneId);
+            tagValueNotNull("GroupOfTariffZoneId",groupOfTariffZoneId);
 
             groupOfTariffZones.setId(groupOfTariffZoneId);
             groupOfTariffZones.withPrivateCode(new PrivateCodeStructure().withValue(privateCode));
