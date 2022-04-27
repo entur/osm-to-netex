@@ -37,8 +37,10 @@
     </developers>
 
     <scm>
-        <connection>scm:git:ssh://git@github.com:entur/osm-to-netex</connection>
-        <developerConnection>scm:git:ssh://git@github.com:entur/osm-to-netex</developerConnection>
+        <connection>scm:git:ssh://git@github.com/entur/osm-to-netex.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/entur/osm-to-netex.git</developerConnection>
+        <url>https://github.com/entur/osm-to-netex/tree/master</url>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
