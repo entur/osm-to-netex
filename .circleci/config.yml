@@ -33,16 +33,16 @@ aliases:
     command: |
       echo $SONATYPE_GPG_KEY_BASE64 | base64 --decode | gpg --batch --no-tty --import --yes
   - &maven-settings-file
-      "\"<settings xsi:schemaLocation='http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd' xmlns='http://maven.apache.org/SETTINGS/1.1.0'
-                xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
-              <servers>
-                <server>
-                  <username>$SONATYPE_USERNAME</username>
-                  <password>$SONATYPE_PASSWORD</password>
-                  <id>ossrh</id>
-                </server>
-              </servers>
-            </settings>\""
+    "\"<settings xsi:schemaLocation='http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd' xmlns='http://maven.apache.org/SETTINGS/1.1.0'
+              xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
+            <servers>
+              <server>
+                <username>$SONATYPE_USERNAME</username>
+                <password>$SONATYPE_PASSWORD</password>
+                <id>ossrh</id>
+              </server>
+            </servers>
+          </settings>\""
 
 commands:
   generate-maven-settings-file:
