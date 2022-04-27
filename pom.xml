@@ -6,26 +6,53 @@
     <artifactId>osm-to-netex</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-  <name>osm-to-netex</name>
-  <description>Converts osm files to netex files</description>
+    <name>osm-to-netex</name>
+    <description>Converts osm files to netex files</description>
 
-  <scm>
-    <connection>scm:git:ssh://git@github.com:entur/osm-to-netex</connection>
-    <developerConnection>scm:git:ssh://git@github.com:entur/osm-to-netex</developerConnection>
-  </scm>
+    <url>https://github.com/entur/osm-to-netex</url>
+    <organization>
+        <name>Entur AS</name>
+        <url>http://www.entur.org/</url>
+    </organization>
+    <licenses>
+        <license>
+            <name>EUPL-1.2 with modifications</name>
+            <url>https://joinup.ec.europa.eu/software/page/eupl</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Christoffer Solem</name>
+            <email>christoffer.solem@entur.org</email>
+            <organization>Entur</organization>
+            <organizationUrl>http://www.entur.org</organizationUrl>
+        </developer>
+        <developer>
+            <name>Assad Riaz</name>
+            <email>assad.riaz@entur.org</email>
+            <organization>Entur</organization>
+            <organizationUrl>http://www.entur.org</organizationUrl>
+        </developer>
+    </developers>
 
-  <distributionManagement>
-    <repository>
-      <id>ossrh</id>
-      <name>Sonatype release</name>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-    <snapshotRepository>
-      <id>ossrh</id>
-      <name>Sonatype snapshot</name>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-  </distributionManagement>
+    <scm>
+        <connection>scm:git:ssh://git@github.com:entur/osm-to-netex</connection>
+        <developerConnection>scm:git:ssh://git@github.com:entur/osm-to-netex</developerConnection>
+    </scm>
+
+    <distributionManagement>
+        <repository>
+            <id>ossrh</id>
+            <name>Sonatype release</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <name>Sonatype snapshot</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencies>
         <dependency>
