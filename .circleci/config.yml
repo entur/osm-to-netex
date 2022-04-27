@@ -32,6 +32,7 @@ aliases:
     name: Configure GPG private key for signing project artifacts in OSS Sonatype
     command: |
       echo $SONATYPE_GPG_KEY_BASE64 | base64 --decode | gpg --batch --no-tty --import --yes
+
   - &maven-settings-file
     "\"<settings xsi:schemaLocation='http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd' xmlns='http://maven.apache.org/SETTINGS/1.1.0'
               xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
@@ -60,7 +61,7 @@ jobs:
     executor: java
     steps:
       - checkout
-      - generate-maven-settings-file
+      - generate-maven-settings-file:
           settings-file: *maven-settings-file
       - restore_cache:
           key: dep-cache-{{ checksum "pom.xml" }}
