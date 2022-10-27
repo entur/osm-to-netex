@@ -87,6 +87,7 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
     public static final String ZONE_TYPE = "zone_type";  //scoping method
     public static final String DEFAULT_VERSION = "1";
     public static final String VALID_FROM = "valid_from";
+    public static final String VALID_TO = "valid_to";
     public static final String FAREZONEID = "id";
     public static final String AUTHORITYREF = "authorityRef";
     public static final String MEMBERS = "members";
@@ -169,6 +170,8 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
         String fareZoneId = null;
         String privateCode = null;
         String tzMapping = null;
+        LocalDateTime fromDate = null;
+        LocalDateTime toDate = null;
 
 
         for (Tag tag : tags) {
@@ -224,10 +227,21 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 try {
                     Instant instant = sdf.parse(validFrom).toInstant();
-                    final LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
-                    //zone.withValidBetween(new ValidBetween().withFromDate(localDateTime));
+                    fromDate = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
                 } catch (ParseException e) {
                     logger.info("Unable to parse and set valid from date: {}", e.getMessage());
+                }
+
+            } else if (tag.getK().equals(VALID_TO)) {
+                String validTo = tag.getV();
+                tagValueNotNull(VALID_TO,validTo);
+
+                SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+                try {
+                    Instant instant = sdf.parse(validTo).toInstant();
+                    toDate = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+                } catch (ParseException e) {
+                    logger.info("Unable to parse and set valid to date: {}",e.getMessage());
                 }
 
             } else if (tag.getK().startsWith(FAREZONEID)) {
@@ -236,6 +250,15 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
                 tzMapping = tag.getV();
             }
         }
+
+        if (fromDate != null && toDate != null && toDate.isAfter(fromDate)) {
+            logger.info("Set validity from and to date");
+            zone.withValidBetween(new ValidBetween().withFromDate(fromDate).withToDate(toDate));
+        } else if (fromDate != null && toDate == null) {
+            logger.info("Set validity only from date");
+            zone.withValidBetween(new ValidBetween().withFromDate(fromDate));
+        }
+
 
         tagValueNotNull(CODESPACE, codespace);
         tagValueNotNull(FAREZONEID,fareZoneId);
@@ -276,6 +299,8 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
     private void mapTags(List<Tag> tags, Zone_VersionStructure zone, String className) {
         String codespace = null;
         String reference = null;
+        LocalDateTime fromDate = null;
+        LocalDateTime toDate = null;
 
         for (Tag tag : tags) {
 
@@ -302,17 +327,36 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
                 SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
                 try {
                     Instant instant = sdf.parse(validFrom).toInstant();
-                    final LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
-                    zone.withValidBetween(new ValidBetween().withFromDate(localDateTime));
+                    fromDate = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
                 } catch (ParseException e) {
                     logger.info("Unable to parse and set valid from date: {}",e.getMessage());
+                }
+            } else if (tag.getK().equals(VALID_TO)) {
+                String validTo = tag.getV();
+                tagValueNotNull(VALID_TO,validTo);
+
+                SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+                try {
+                    Instant instant = sdf.parse(validTo).toInstant();
+                    toDate = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+                } catch (ParseException e) {
+                    logger.info("Unable to parse and set valid to date: {}",e.getMessage());
                 }
 
             }
         }
 
-        tagValueNotNull(CODESPACE, codespace);
-        tagValueNotNull(REFERENCE, reference);
+        if (fromDate != null && toDate != null && toDate.isAfter(fromDate)) {
+            logger.info("Set validity from and to date");
+            zone.withValidBetween(new ValidBetween().withFromDate(fromDate).withToDate(toDate));
+        } else if (fromDate != null && toDate == null) {
+            logger.info("Set validity only from date");
+            zone.withValidBetween(new ValidBetween().withFromDate(fromDate));
+        }
+
+
+        //tagValueNotNull(CODESPACE, codespace);
+        //tagValueNotNull(REFERENCE, reference);
 
 
         zone.setId(generateId(codespace, className, reference));

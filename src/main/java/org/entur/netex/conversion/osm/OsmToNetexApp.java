@@ -17,9 +17,13 @@ package org.entur.netex.conversion.osm;
 
 import org.apache.commons.cli.*;
 import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.TariffZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.commons.io.FilenameUtils;
+
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Entry point for running.
@@ -52,7 +56,13 @@ public class OsmToNetexApp {
 
             logger.info("got osm file: {}", osmFile);
 
-            String netexOutputFile = cmd.getOptionValue(NETEX_OUTPUT_FILE, NETEX_OUTPUT_FILE_DEFAULT_VALUE);
+            final String baseFileName = FilenameUtils.removeExtension(Paths.get(osmFile).getFileName().toString());
+
+
+            String outPutFileName = new SimpleDateFormat("'"+baseFileName+"_'yyyyMMddHHmmss'.xml'").format(new Date());
+
+
+            String netexOutputFile = cmd.getOptionValue(NETEX_OUTPUT_FILE, outPutFileName);
 
             ObjectFactory netexObjectFactory = new ObjectFactory();
             NetexHelper netexHelper = new NetexHelper(netexObjectFactory);
