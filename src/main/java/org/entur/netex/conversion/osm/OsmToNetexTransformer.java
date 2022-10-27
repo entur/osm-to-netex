@@ -76,7 +76,7 @@ public class OsmToNetexTransformer {
 
         PublicationDeliveryStructure publicationDeliveryStructure = netexHelper.createPublicationDelivery(siteFrame, osmInputFile);
 
-        FileOutputStream fileOutputStream = new FileOutputStream(netexOutputFile);
+        FileOutputStream fileOutputStream = new FileOutputStream("target/"+netexOutputFile);
         netexHelper.marshalNetex(publicationDeliveryStructure, fileOutputStream);
 
         logger.info("Done. Check the result in the file {}", netexOutputFile);
