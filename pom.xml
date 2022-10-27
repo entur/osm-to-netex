@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.entur</groupId>
     <artifactId>osm-to-netex</artifactId>
-    <version>1.1</version>
+    <version>1.2-SNAPSHOT</version>
 
     <name>osm-to-netex</name>
     <description>Converts osm files to netex files</description>
