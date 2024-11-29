@@ -15,6 +15,7 @@ env:
     SONATYPE_GPG_KEY_PASSWORD: ${{ secrets.SONATYPE_GPG_KEY_PASSWORD }}
 jobs:
   maven-package:
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -38,14 +39,14 @@ jobs:
             ${{ runner.os }}-
 
       - name: Run maven build
-        run: mvn package -s .github/workflows/settings.xml
+        run: mvn package -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -s .github/workflows/settings.xml
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4.4.3
         with:
           path: target/*.jar
   deploy-maven-central:
-    if: github.repository_owner == 'entur' && github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.repository_owner == 'entur' && github.event_name == 'push' && github.ref == 'refs/heads/master' && !contains(github.event.head_commit.message, 'ci skip')
     needs: [maven-package]
     runs-on: ubuntu-24.04
     steps:
@@ -76,4 +77,9 @@ jobs:
           git config --global user.email "circleci@entur.no"
           git config --global user.name "circleci"
           git checkout master
-          mvn gitflow:release-start gitflow:release-finish -DskipTests=true -Prelease -DpostReleaseGoals=deploy -DargLine='-Prelease -DskipTests -s .github/workflows/settings.xml' -B -s .github/workflows/settings.xml
+          mvn gitflow:release-start gitflow:release-finish \
+                  -DskipTests=true \
+                  -Prelease \
+                  -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
+                  -DpostReleaseGoals=deploy \
+                  -DargLine='-Prelease -DskipTests -s .github/workflows/settings.xml' -B -s .github/workflows/settings.xml
