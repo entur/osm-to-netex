@@ -75,5 +75,5 @@ jobs:
           echo $SONATYPE_GPG_KEY_BASE64 | base64 --decode | gpg --batch --no-tty --import --yes
           git config --global user.email "circleci@entur.no"
           git config --global user.name "circleci"
-          git checkout main
+          git checkout master
           mvn gitflow:release-start gitflow:release-finish -DskipTests=true -Prelease -DpostReleaseGoals=deploy -DargLine='-Prelease -DskipTests -s .github/workflows/settings.xml' -B -s .github/workflows/settings.xml
