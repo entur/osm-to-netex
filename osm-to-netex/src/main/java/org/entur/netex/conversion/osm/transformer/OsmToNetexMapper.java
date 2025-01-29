@@ -13,7 +13,7 @@
  * limitations under the Licence.
  */
 
-package org.entur.netex.conversion.osm;
+package org.entur.netex.conversion.osm.transformer;
 
 import net.opengis.gml._3.AbstractRingPropertyType;
 import net.opengis.gml._3.DirectPositionListType;
@@ -33,7 +33,6 @@ import org.rutebanken.netex.model.KeyListStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.OrganisationRefStructure;
 import org.rutebanken.netex.model.PointRefStructure;
 import org.rutebanken.netex.model.PointRefs_RelStructure;
 import org.rutebanken.netex.model.PrivateCodeStructure;
@@ -56,9 +55,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,33 +67,33 @@ import java.util.stream.Stream;
  *
  * @param <T>
  */
-public class OsmToNetexMapper<T extends Zone_VersionStructure> {
+class OsmToNetexMapper<T extends Zone_VersionStructure> {
 
     /**
      * The prefix (usually three letters) in IDs.
      */
-    public static final String CODESPACE = "codespace";
+    protected static final String CODESPACE = "codespace";
     /**
      * The objects name that will be retrieved from a tag with the same value.
      */
-    public static final String NAME = "name";
+    protected static final String NAME = "name";
     /**
      * Reference, which is the postfix of the generated Netex ID
      */
-    public static final String REFERENCE = "reference";  //privatecode
-    public static final String ZONE_TYPE = "zone_type";  //scoping method
-    public static final String DEFAULT_VERSION = "1";
-    public static final String VALID_FROM = "valid_from";
-    public static final String VALID_TO = "valid_to";
-    public static final String FAREZONEID = "id";
-    public static final String AUTHORITYREF = "authorityRef";
-    public static final String MEMBERS = "members";
-    public static final String NEIGHBOURS = "neighbours";
-    public static final String PRIVATECODE = "privateCode";
-    public static final String SCOPINGMETHOD = "scopingMethod";
-    public static final String TARIFFZONETYPE ="tariffZone";
-    public static final String ZONETOPOLOGY ="zoneTopology";
-    public static final String TZMAPPING ="tzMapping";
+    protected static final String REFERENCE = "reference";  //privatecode
+    protected static final String ZONE_TYPE = "zone_type";  //scoping method
+    protected static final String DEFAULT_VERSION = "1";
+    protected static final String VALID_FROM = "valid_from";
+    protected static final String VALID_TO = "valid_to";
+    protected static final String FAREZONEID = "id";
+    protected static final String AUTHORITYREF = "authorityRef";
+    protected static final String MEMBERS = "members";
+    protected static final String NEIGHBOURS = "neighbours";
+    protected static final String PRIVATECODE = "privateCode";
+    protected static final String SCOPINGMETHOD = "scopingMethod";
+    protected static final String TARIFFZONETYPE ="tariffZone";
+    protected static final String ZONETOPOLOGY ="zoneTopology";
+    protected static final String TZMAPPING ="tzMapping";
 
 
     /*
@@ -114,24 +111,23 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
     <tag k='zoneTopology' v='tiled' />**
      */
 
-    private static final Logger logger = LoggerFactory.getLogger(OsmToNetexTransformer.class);
+    private static final Logger logger = LoggerFactory.getLogger(OsmToNetexMapper.class);
     private static final net.opengis.gml._3.ObjectFactory openGisObjectFactory = new net.opengis.gml._3.ObjectFactory();
     private final NetexHelper netexHelper;
 
-    public OsmToNetexMapper(NetexHelper netexHelper) {
+    protected OsmToNetexMapper(NetexHelper netexHelper) {
         this.netexHelper = netexHelper;
     }
 
-    public List<Map<BigInteger,T>> mapWaysToZoneList(List<Way> ways, Map<BigInteger, Node> mapOfNodes, Class<T> clazz) {
-        List<Map<BigInteger,T>> zones = ways
+    protected Stream<Map<BigInteger, T>> mapWaysToZoneList(List<Way> ways, Map<BigInteger, Node> mapOfNodes, Class<T> clazz) {
+        Stream<Map<BigInteger, T>> zones = ways
                 .stream()
-                .map(way -> mapWayToZone(way, mapOfNodes, clazz))
-                .collect(Collectors.toList());
-        logger.info("Mapped {} zones of type {} from osm to netex", zones.size(), clazz);
+                .map(way -> mapWayToZone(way, mapOfNodes, clazz));
+        //logger.info("Mapped {} zones of type {} from osm to netex", zones.size(), clazz);
         return zones;
     }
 
-    public Map<BigInteger, T> mapWayToZone(Way way, Map<BigInteger, Node> mapOfNodes, Class<T> clazz) {
+    protected Map<BigInteger, T> mapWayToZone(Way way, Map<BigInteger, Node> mapOfNodes, Class<T> clazz) {
         Map<BigInteger,T> map= new HashMap<>();
 
         T zone = netexHelper.createNetexObject(clazz);
@@ -151,7 +147,7 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
         return map;
     }
 
-    private void mapFareZoneTags(List<Tag> tags, FareZone zone) {
+    protected void mapFareZoneTags(List<Tag> tags, FareZone zone) {
          /*
     <tag k='area' v='tariffZone' />
     <tag k='authorityRef' v='VOT:Authority:VTFK_ID' />**
@@ -377,7 +373,7 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
         }
     }
 
-    public List<GroupOfTariffZones> mapRelationsToGroupOfTariffZones(List<Relation> relations, List<Map<BigInteger, T>> fareZoneMaps) {
+    protected List<GroupOfTariffZones> mapRelationsToGroupOfTariffZones(List<Relation> relations, List<Map<BigInteger, T>> fareZoneMaps) {
        return relations.stream()
                 .map(rel -> mapRelationToGroupOfTariffZones(rel,fareZoneMaps))
                 .collect(Collectors.toList());
@@ -387,19 +383,13 @@ public class OsmToNetexMapper<T extends Zone_VersionStructure> {
         final GroupOfTariffZones groupOfTariffZones = new ObjectFactory().createGroupOfTariffZones();
         mapRelationTags(relation.getTag(),groupOfTariffZones);
 
-        List<TariffZoneRef> tariffZoneRefs = new ArrayList<>();
-
         final Map<BigInteger, String> wayIdFareZoneIds = fareZoneMaps.stream()
                 .flatMap(m -> m.entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getId()));
 
-        final List<BigInteger> members = relation.getMember().stream().map(Member::getRef).collect(Collectors.toList());
-
-        for (BigInteger member : members) {
-            final String fareZoneId = wayIdFareZoneIds.get(member);
-            final TariffZoneRef tariffZoneRef = new TariffZoneRef().withRef(fareZoneId).withVersion("1");
-            tariffZoneRefs.add(tariffZoneRef);
-        }
+        final List<TariffZoneRef> tariffZoneRefs = relation.getMember().stream().map(Member::getRef)
+                .map(member -> new TariffZoneRef().withRef(wayIdFareZoneIds.get(member)).withVersion("1"))
+                .toList();
 
         groupOfTariffZones.withMembers(new TariffZoneRefs_RelStructure().withTariffZoneRef(tariffZoneRefs))  ;
 

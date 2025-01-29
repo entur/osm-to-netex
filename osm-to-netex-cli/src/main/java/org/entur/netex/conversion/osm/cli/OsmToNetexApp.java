@@ -13,14 +13,25 @@
  * limitations under the Licence.
  */
 
-package org.entur.netex.conversion.osm;
+package org.entur.netex.conversion.osm.cli;
 
 import org.apache.commons.cli.*;
+import org.entur.netex.conversion.osm.transformer.NetexHelper;
+import org.entur.netex.conversion.osm.transformer.OsmToNetexTransformer;
+import org.entur.netex.conversion.osm.transformer.OsmUnmarshaller;
+import org.openstreetmap.osm.Osm;
 import org.rutebanken.netex.model.ObjectFactory;
+import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.io.FilenameUtils;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
+import javax.xml.bind.JAXBException;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -70,18 +81,38 @@ public class OsmToNetexApp {
 
             String targetEntity = cmd.getOptionValue(TARGET_ENTITY);
 
-            OsmToNetexTransformer osmToNetexTransformer = new OsmToNetexTransformer(netexHelper, targetEntity);
-            osmToNetexTransformer.transform(osmFile, netexOutputFile);
+            transform(osmFile, netexOutputFile, targetEntity);
         } catch (UnrecognizedOptionException e) {
-            System.err.println(e.getMessage());
-            e.printStackTrace();
+            logger.error("Unable to convert to NeTEx", e);
             printHelp(options);
             System.exit(1);
         }
     }
 
+    private static void transform(String osmInputFile, String netexOutputFile, String targetEntity) throws JAXBException, IOException, ClassNotFoundException, SAXException, ParserConfigurationException {
 
-    public static void printHelp(Options options) {
+        OsmUnmarshaller osmUnmarshaller = new OsmUnmarshaller(false);
+        InputSource osmInputSource = new InputSource(osmInputFile);
+
+        Osm osm = osmUnmarshaller.unmarshall(osmInputSource);
+
+        logger.info("Unmarshalled OSM file. generator: {}, version: {}, nodes: {}, ways: {}, relations: {}",
+                osm.getGenerator(), osm.getVersion(), osm.getNode().size(), osm.getWay().size(), osm.getRelation().size());
+        ObjectFactory netexObjectFactory = new ObjectFactory();
+        NetexHelper netexHelper = new NetexHelper(netexObjectFactory);
+
+        OsmToNetexTransformer osmToNetexTransformer = new OsmToNetexTransformer(netexHelper);
+
+        PublicationDeliveryStructure publicationDeliveryStructure = osmToNetexTransformer.map(osm, targetEntity);
+
+        FileOutputStream fileOutputStream = new FileOutputStream("target/"+netexOutputFile);
+        netexHelper.marshalNetex(publicationDeliveryStructure, fileOutputStream);
+
+        logger.info("Done. Check the result in the file {}", netexOutputFile);
+    }
+
+
+    private static void printHelp(Options options) {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp("java -jar <path-to-jar-file>", options);
     }

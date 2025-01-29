@@ -1,4 +1,4 @@
-package org.entur.netex.conversion.osm;
+package org.entur.netex.conversion.osm.transformer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

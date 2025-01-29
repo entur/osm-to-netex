@@ -1,4 +1,4 @@
-package org.entur.netex.conversion.osm;
+package org.entur.netex.conversion.osm.transformer;
 
 import org.openstreetmap.osm.Osm;
 import org.xml.sax.InputSource;

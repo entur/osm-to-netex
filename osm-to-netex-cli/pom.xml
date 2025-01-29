@@ -3,10 +3,12 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
-    <name>osm-to-netex</name>
+    <groupId>org.entur</groupId>
+    <artifactId>osm-to-netex-cli</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <name>osm-to-netex-cli</name>
     <description>Converts osm files to netex files</description>
-    <packaging>pom</packaging>
-    <artifactId>osm-to-netex-parent</artifactId>
 
     <url>https://github.com/entur/osm-to-netex</url>
     <organization>
@@ -42,8 +44,11 @@
         <tag>HEAD</tag>
     </scm>
 
-    <modules>
-        <module>osm-to-netex-cli</module>
-        <module>osm-to-netex</module>
-    </modules>
+    <dependencies>
+        <dependency>
+            <groupId>org.entur</groupId>
+            <artifactId>osm-to-netex</artifactId>
+            <version>1.3-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 </project>
