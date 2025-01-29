@@ -22,6 +22,7 @@ import org.xml.sax.SAXException;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.UnknownHostException;
@@ -32,15 +33,23 @@ public class NetexHelper {
     private final ObjectFactory netexObjectFactory;
     private final Marshaller marshaller;
 
-    public NetexHelper(ObjectFactory netexObjectFactory) throws JAXBException, IOException, SAXException {
+    public NetexHelper(ObjectFactory netexObjectFactory) {
         this.netexObjectFactory = netexObjectFactory;
-        marshaller = JAXBContext.newInstance(StopPlace.class).createMarshaller();
-        marshaller.setSchema(new NeTExValidator().getSchema());
-        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+        try {
+            marshaller = JAXBContext.newInstance(StopPlace.class).createMarshaller();
+            marshaller.setSchema(new NeTExValidator().getSchema());
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+        } catch (JAXBException | SAXException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public void marshalNetex(PublicationDeliveryStructure publicationDeliveryStructure, OutputStream outputStream) throws JAXBException {
-        marshaller.marshal(netexObjectFactory.createPublicationDelivery(publicationDeliveryStructure), outputStream);
+    public void marshalNetex(PublicationDeliveryStructure publicationDeliveryStructure, OutputStream outputStream) {
+        try {
+            marshaller.marshal(netexObjectFactory.createPublicationDelivery(publicationDeliveryStructure), outputStream);
+        } catch (JAXBException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @SuppressWarnings("unchecked")

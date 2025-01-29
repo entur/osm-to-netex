@@ -32,8 +32,15 @@ import org.rutebanken.netex.model.TopographicPlacesInFrame_RelStructure;
 import org.rutebanken.netex.model.Zone_VersionStructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
@@ -46,8 +53,25 @@ public class OsmToNetexTransformer {
 
     private final NetexHelper netexHelper;
 
-    public OsmToNetexTransformer(NetexHelper netexHelper) {
-        this.netexHelper = netexHelper;
+    public OsmToNetexTransformer() {
+        ObjectFactory netexObjectFactory = new ObjectFactory();
+        this.netexHelper = new NetexHelper(netexObjectFactory);
+    }
+
+    public void marshallOsm(InputSource osmInput, OutputStream output, String targetEntity) throws ClassNotFoundException {
+        try {
+            OsmUnmarshaller osmUnmarshaller = new OsmUnmarshaller(false);
+
+            Osm osm = osmUnmarshaller.unmarshall(osmInput);
+
+            PublicationDeliveryStructure publicationDeliveryStructure = map(osm, targetEntity);
+            netexHelper.marshalNetex(publicationDeliveryStructure, output);
+
+            logger.info("Unmarshalled OSM file. generator: {}, version: {}, nodes: {}, ways: {}, relations: {}",
+                    osm.getGenerator(), osm.getVersion(), osm.getNode().size(), osm.getWay().size(), osm.getRelation().size());
+        } catch (JAXBException | SAXException | IOException | ParserConfigurationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public PublicationDeliveryStructure map(Osm osm, String targetEntity) throws ClassNotFoundException {
@@ -77,6 +101,8 @@ public class OsmToNetexTransformer {
         }
         return netexHelper.createPublicationDelivery(siteFrame, "Hello");
     }
+
+
 
     private SiteFrame generateSiteFrameFromTariffZone(Osm osm, Map<BigInteger, Node> mapOfNodes) {
         SiteFrame siteFrame = netexHelper.createSiteFrame();

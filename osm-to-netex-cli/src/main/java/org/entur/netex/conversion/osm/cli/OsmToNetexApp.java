@@ -16,20 +16,12 @@
 package org.entur.netex.conversion.osm.cli;
 
 import org.apache.commons.cli.*;
-import org.entur.netex.conversion.osm.transformer.NetexHelper;
 import org.entur.netex.conversion.osm.transformer.OsmToNetexTransformer;
-import org.entur.netex.conversion.osm.transformer.OsmUnmarshaller;
-import org.openstreetmap.osm.Osm;
-import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.io.FilenameUtils;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -69,15 +61,9 @@ public class OsmToNetexApp {
 
             final String baseFileName = FilenameUtils.removeExtension(Paths.get(osmFile).getFileName().toString());
 
-
             String outPutFileName = new SimpleDateFormat("'"+baseFileName+"_'yyyyMMddHHmmss'.xml'").format(new Date());
 
-
             String netexOutputFile = cmd.getOptionValue(NETEX_OUTPUT_FILE, outPutFileName);
-
-            ObjectFactory netexObjectFactory = new ObjectFactory();
-            NetexHelper netexHelper = new NetexHelper(netexObjectFactory);
-
 
             String targetEntity = cmd.getOptionValue(TARGET_ENTITY);
 
@@ -89,24 +75,13 @@ public class OsmToNetexApp {
         }
     }
 
-    private static void transform(String osmInputFile, String netexOutputFile, String targetEntity) throws JAXBException, IOException, ClassNotFoundException, SAXException, ParserConfigurationException {
+    private static void transform(String osmInputFile, String netexOutputFile, String targetEntity) throws IOException, ClassNotFoundException {
+        OsmToNetexTransformer osmToNetexTransformer = new OsmToNetexTransformer();
 
-        OsmUnmarshaller osmUnmarshaller = new OsmUnmarshaller(false);
         InputSource osmInputSource = new InputSource(osmInputFile);
+        FileOutputStream fileOutputStream = new FileOutputStream(netexOutputFile);
 
-        Osm osm = osmUnmarshaller.unmarshall(osmInputSource);
-
-        logger.info("Unmarshalled OSM file. generator: {}, version: {}, nodes: {}, ways: {}, relations: {}",
-                osm.getGenerator(), osm.getVersion(), osm.getNode().size(), osm.getWay().size(), osm.getRelation().size());
-        ObjectFactory netexObjectFactory = new ObjectFactory();
-        NetexHelper netexHelper = new NetexHelper(netexObjectFactory);
-
-        OsmToNetexTransformer osmToNetexTransformer = new OsmToNetexTransformer(netexHelper);
-
-        PublicationDeliveryStructure publicationDeliveryStructure = osmToNetexTransformer.map(osm, targetEntity);
-
-        FileOutputStream fileOutputStream = new FileOutputStream("target/"+netexOutputFile);
-        netexHelper.marshalNetex(publicationDeliveryStructure, fileOutputStream);
+        osmToNetexTransformer.marshallOsm(osmInputSource, fileOutputStream, targetEntity);
 
         logger.info("Done. Check the result in the file {}", netexOutputFile);
     }
