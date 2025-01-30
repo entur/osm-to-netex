@@ -23,7 +23,7 @@
 
 package org.openstreetmap.osm;
 
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;
 import java.math.BigInteger;
 
 

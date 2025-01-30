@@ -24,31 +24,12 @@ import org.openstreetmap.osm.Node;
 import org.openstreetmap.osm.Relation;
 import org.openstreetmap.osm.Tag;
 import org.openstreetmap.osm.Way;
-import org.rutebanken.netex.model.AuthorityRefStructure;
-import org.rutebanken.netex.model.FareZone;
-import org.rutebanken.netex.model.FareZoneRefStructure;
-import org.rutebanken.netex.model.FareZoneRefs_RelStructure;
-import org.rutebanken.netex.model.GroupOfTariffZones;
-import org.rutebanken.netex.model.KeyListStructure;
-import org.rutebanken.netex.model.KeyValueStructure;
-import org.rutebanken.netex.model.MultilingualString;
-import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.PointRefStructure;
-import org.rutebanken.netex.model.PointRefs_RelStructure;
-import org.rutebanken.netex.model.PrivateCodeStructure;
-import org.rutebanken.netex.model.PurposeOfGroupingRefStructure;
-import org.rutebanken.netex.model.ScheduledStopPointRefStructure;
-import org.rutebanken.netex.model.ScopingMethodEnumeration;
-import org.rutebanken.netex.model.TariffZone;
-import org.rutebanken.netex.model.TariffZoneRef;
-import org.rutebanken.netex.model.TariffZoneRefs_RelStructure;
-import org.rutebanken.netex.model.ValidBetween;
-import org.rutebanken.netex.model.ZoneTopologyEnumeration;
-import org.rutebanken.netex.model.Zone_VersionStructure;
+import org.rutebanken.netex.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBElement;
+
 import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -91,9 +72,9 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
     protected static final String NEIGHBOURS = "neighbours";
     protected static final String PRIVATECODE = "privateCode";
     protected static final String SCOPINGMETHOD = "scopingMethod";
-    protected static final String TARIFFZONETYPE ="tariffZone";
-    protected static final String ZONETOPOLOGY ="zoneTopology";
-    protected static final String TZMAPPING ="tzMapping";
+    protected static final String TARIFFZONETYPE = "tariffZone";
+    protected static final String ZONETOPOLOGY = "zoneTopology";
+    protected static final String TZMAPPING = "tzMapping";
 
 
     /*
@@ -128,22 +109,22 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
     }
 
     protected Map<BigInteger, T> mapWayToZone(Way way, Map<BigInteger, Node> mapOfNodes, Class<T> clazz) {
-        Map<BigInteger,T> map= new HashMap<>();
+        Map<BigInteger, T> map = new HashMap<>();
 
         T zone = netexHelper.createNetexObject(clazz);
 
         zone.setVersion(DEFAULT_VERSION);
-    
-        if (clazz.getSimpleName().equals("FareZone")){
+
+        if (clazz.getSimpleName().equals("FareZone")) {
             mapFareZoneTags(way.getTag(), (FareZone) zone);
-            
+
         } else {
             mapTags(way.getTag(), zone, clazz.getSimpleName());
         }
 
         zone.setPolygon(mapNodes(way, mapOfNodes));
 
-            map.put(way.getId(),zone);
+        map.put(way.getId(), zone);
         return map;
     }
 
@@ -180,8 +161,8 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
                 zone.setName(new MultilingualString().withValue(tag.getV()).withLang(lang));
             } else if (tag.getK().startsWith(AUTHORITYREF)) {
                 String authorityRef = tag.getV();
-                tagValueNotNull(AUTHORITYREF,authorityRef);
-                zone.withTransportOrganisationRef(new ObjectFactory().createAuthorityRef(new AuthorityRefStructure().withRef(authorityRef)));
+                tagValueNotNull(AUTHORITYREF, authorityRef);
+                zone.withTransportOrganisationRef(new ObjectFactory().createAuthorityRef(new AuthorityRef().withRef(authorityRef)));
             } else if (tag.getK().startsWith(PRIVATECODE)) {
                 privateCode = tag.getV();
             } else if (tag.getK().startsWith(ZONETOPOLOGY)) {
@@ -230,18 +211,18 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
 
             } else if (tag.getK().equals(VALID_TO)) {
                 String validTo = tag.getV();
-                tagValueNotNull(VALID_TO,validTo);
+                tagValueNotNull(VALID_TO, validTo);
 
-                SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 try {
                     Instant instant = sdf.parse(validTo).toInstant();
                     toDate = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
                 } catch (ParseException e) {
-                    logger.info("Unable to parse and set valid to date: {}",e.getMessage());
+                    logger.info("Unable to parse and set valid to date: {}", e.getMessage());
                 }
 
             } else if (tag.getK().startsWith(FAREZONEID)) {
-                fareZoneId =tag.getV();
+                fareZoneId = tag.getV();
             } else if (tag.getK().startsWith(TZMAPPING)) {
                 tzMapping = tag.getV();
             }
@@ -257,10 +238,10 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
 
 
         tagValueNotNull(CODESPACE, codespace);
-        tagValueNotNull(FAREZONEID,fareZoneId);
-        tagValueNotNull(PRIVATECODE,privateCode);
+        tagValueNotNull(FAREZONEID, fareZoneId);
+        tagValueNotNull(PRIVATECODE, privateCode);
         zone.withPrivateCode(new PrivateCodeStructure().withValue(privateCode));
-        generateOrSetTzMapping(zone,tzMapping,privateCode,codespace);
+        generateOrSetTzMapping(zone, tzMapping, privateCode, codespace);
         zone.setId(fareZoneId);
     }
 
@@ -311,32 +292,32 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
             } else if (tag.getK().startsWith(ZONE_TYPE)) {
                 String keyName = tag.getK();
                 String value = tag.getV();
-                tagValueNotNull(ZONE_TYPE,value);
+                tagValueNotNull(ZONE_TYPE, value);
 
                 KeyValueStructure keyValueStructure = new KeyValueStructure().withKey(keyName).withValue(value);
                 KeyListStructure keyListStructure = new KeyListStructure().withKeyValue(keyValueStructure);
                 zone.setKeyList(keyListStructure);
             } else if (tag.getK().equals(VALID_FROM)) {
                 String validFrom = tag.getV();
-                tagValueNotNull(VALID_FROM,validFrom);
+                tagValueNotNull(VALID_FROM, validFrom);
 
-                SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 try {
                     Instant instant = sdf.parse(validFrom).toInstant();
                     fromDate = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
                 } catch (ParseException e) {
-                    logger.info("Unable to parse and set valid from date: {}",e.getMessage());
+                    logger.info("Unable to parse and set valid from date: {}", e.getMessage());
                 }
             } else if (tag.getK().equals(VALID_TO)) {
                 String validTo = tag.getV();
-                tagValueNotNull(VALID_TO,validTo);
+                tagValueNotNull(VALID_TO, validTo);
 
-                SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 try {
                     Instant instant = sdf.parse(validTo).toInstant();
                     toDate = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
                 } catch (ParseException e) {
-                    logger.info("Unable to parse and set valid to date: {}",e.getMessage());
+                    logger.info("Unable to parse and set valid to date: {}", e.getMessage());
                 }
 
             }
@@ -374,26 +355,31 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
     }
 
     protected List<GroupOfTariffZones> mapRelationsToGroupOfTariffZones(List<Relation> relations, List<Map<BigInteger, T>> fareZoneMaps) {
-       return relations.stream()
-                .map(rel -> mapRelationToGroupOfTariffZones(rel,fareZoneMaps))
+        return relations.stream()
+                .map(rel -> mapRelationToGroupOfTariffZones(rel, fareZoneMaps))
                 .collect(Collectors.toList());
     }
 
-    private GroupOfTariffZones mapRelationToGroupOfTariffZones(Relation relation, List<Map<BigInteger,T>> fareZoneMaps) {
+    private GroupOfTariffZones mapRelationToGroupOfTariffZones(Relation relation, List<Map<BigInteger, T>> fareZoneMaps) {
         final GroupOfTariffZones groupOfTariffZones = new ObjectFactory().createGroupOfTariffZones();
-        mapRelationTags(relation.getTag(),groupOfTariffZones);
+        mapRelationTags(relation.getTag(), groupOfTariffZones);
 
         final Map<BigInteger, String> wayIdFareZoneIds = fareZoneMaps.stream()
                 .flatMap(m -> m.entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getId()));
 
-        final List<TariffZoneRef> tariffZoneRefs = relation.getMember().stream().map(Member::getRef)
-                .map(member -> new TariffZoneRef().withRef(wayIdFareZoneIds.get(member)).withVersion("1"))
-                .toList();
+        final TariffZoneRefs_RelStructure tariffZoneRefsRelStructure = new TariffZoneRefs_RelStructure();
 
-        groupOfTariffZones.withMembers(new TariffZoneRefs_RelStructure().withTariffZoneRef(tariffZoneRefs))  ;
+        relation.getMember().stream().map(Member::getRef)
+                .map(member -> new ObjectFactory().createTariffZoneRef(
+                        new TariffZoneRef()
+                                .withRef(wayIdFareZoneIds.get(member))
+                                .withVersion("1")))
+                .forEach(t -> {
+                    tariffZoneRefsRelStructure.getTariffZoneRef_().add(t);
+                });
 
-
+        groupOfTariffZones.withMembers(tariffZoneRefsRelStructure);
 
         return groupOfTariffZones;
     }
@@ -404,7 +390,7 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
         String privateCode = null;
         String purposeOfGroupingRef = null;
 
-        for(Tag tag :tags) {
+        for (Tag tag : tags) {
             if (tag.getK().equals("GroupOfTariffZoneId")) {
                 groupOfTariffZoneId = tag.getV();
             } else if (tag.getK().startsWith(NAME)) {
@@ -417,12 +403,12 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
                 purposeOfGroupingRef = tag.getV();
             }
         }
-            tagValueNotNull("GroupOfTariffZoneId",groupOfTariffZoneId);
+        tagValueNotNull("GroupOfTariffZoneId", groupOfTariffZoneId);
 
-            groupOfTariffZones.setId(groupOfTariffZoneId);
-            groupOfTariffZones.withPrivateCode(new PrivateCodeStructure().withValue(privateCode));
-            groupOfTariffZones.setPurposeOfGroupingRef(new PurposeOfGroupingRefStructure().withRef(purposeOfGroupingRef));
-            groupOfTariffZones.setVersion("1");
+        groupOfTariffZones.setId(groupOfTariffZoneId);
+        groupOfTariffZones.withPrivateCode(new PrivateCodeStructure().withValue(privateCode));
+        groupOfTariffZones.setPurposeOfGroupingRef(new PurposeOfGroupingRefStructure().withRef(purposeOfGroupingRef));
+        groupOfTariffZones.setVersion("1");
 
     }
 }

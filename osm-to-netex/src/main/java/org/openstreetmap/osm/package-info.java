@@ -20,5 +20,5 @@
 // Generated on: 2018.03.21 at 02:35:20 PM CET 
 //
 
-@javax.xml.bind.annotation.XmlSchema(namespace = "http://openstreetmap.org/osm/0.6", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+@jakarta.xml.bind.annotation.XmlSchema(namespace = "http://openstreetmap.org/osm/0.6", elementFormDefault = jakarta.xml.bind.annotation.XmlNsForm.QUALIFIED)
 package org.openstreetmap.osm;
