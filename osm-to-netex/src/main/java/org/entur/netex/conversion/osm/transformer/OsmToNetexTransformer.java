@@ -47,13 +47,13 @@ public class OsmToNetexTransformer {
         this.netexHelper = new NetexHelper(netexObjectFactory);
     }
 
-    public void marshallOsm(InputSource osmInput, OutputStream output, String targetEntity) throws ClassNotFoundException {
+    public void marshallOsm(InputSource osmInput, OutputStream output, String targetEntity, String generatedFrom, String participantRef) throws ClassNotFoundException {
         try {
             OsmUnmarshaller osmUnmarshaller = new OsmUnmarshaller(false);
 
             Osm osm = osmUnmarshaller.unmarshall(osmInput);
 
-            PublicationDeliveryStructure publicationDeliveryStructure = map(osm, targetEntity);
+            PublicationDeliveryStructure publicationDeliveryStructure = map(osm, targetEntity, generatedFrom, participantRef);
             netexHelper.marshalNetex(publicationDeliveryStructure, output);
 
             logger.info("Unmarshalled OSM file. generator: {}, version: {}, nodes: {}, ways: {}, relations: {}",
@@ -63,7 +63,7 @@ public class OsmToNetexTransformer {
         }
     }
 
-    public PublicationDeliveryStructure map(Osm osm, String targetEntity) throws ClassNotFoundException {
+    public PublicationDeliveryStructure map(Osm osm, String targetEntity, String generatedFrom, String participantRef) throws ClassNotFoundException {
 
         /*
          * 1. Parse relations to collect ways first
@@ -88,7 +88,7 @@ public class OsmToNetexTransformer {
         } else {
             throw new IllegalArgumentException(clazz + " is not supported");
         }
-        return netexHelper.createPublicationDelivery(siteFrame, "Hello");
+        return netexHelper.createPublicationDelivery(siteFrame, generatedFrom, participantRef);
     }
 
 

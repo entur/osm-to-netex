@@ -81,7 +81,7 @@ public class OsmToNetexApp {
         InputSource osmInputSource = new InputSource(osmInputFile);
         FileOutputStream fileOutputStream = new FileOutputStream(netexOutputFile);
 
-        osmToNetexTransformer.marshallOsm(osmInputSource, fileOutputStream, targetEntity);
+        osmToNetexTransformer.marshallOsm(osmInputSource, fileOutputStream, targetEntity, osmInputFile);
 
         logger.info("Done. Check the result in the file {}", netexOutputFile);
     }
