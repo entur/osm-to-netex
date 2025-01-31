@@ -36,10 +36,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -100,32 +97,24 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
         this.netexHelper = netexHelper;
     }
 
-    protected Stream<Map<BigInteger, T>> mapWaysToZoneList(List<Way> ways, Map<BigInteger, Node> mapOfNodes, Class<T> clazz) {
-        Stream<Map<BigInteger, T>> zones = ways
-                .stream()
-                .map(way -> mapWayToZone(way, mapOfNodes, clazz));
-        //logger.info("Mapped {} zones of type {} from osm to netex", zones.size(), clazz);
-        return zones;
+    protected Stream<Map.Entry<BigInteger, T>> mapWaysToZoneList(List<Way> ways, Map<BigInteger, Node> mapOfNodes, Class<T> clazz) {
+        return ways.stream().map(way -> mapWayToZone(way, mapOfNodes, clazz));
     }
 
-    protected Map<BigInteger, T> mapWayToZone(Way way, Map<BigInteger, Node> mapOfNodes, Class<T> clazz) {
-        Map<BigInteger, T> map = new HashMap<>();
-
+    protected Map.Entry<BigInteger, T> mapWayToZone(Way way, Map<BigInteger, Node> mapOfNodes, Class<T> clazz) {
         T zone = netexHelper.createNetexObject(clazz);
 
         zone.setVersion(DEFAULT_VERSION);
 
         if (clazz.getSimpleName().equals("FareZone")) {
             mapFareZoneTags(way.getTag(), (FareZone) zone);
-
         } else {
             mapTags(way.getTag(), zone, clazz.getSimpleName());
         }
 
         zone.setPolygon(mapNodes(way, mapOfNodes));
 
-        map.put(way.getId(), zone);
-        return map;
+        return Map.entry(way.getId(), zone);
     }
 
     protected void mapFareZoneTags(List<Tag> tags, FareZone zone) {
@@ -257,16 +246,16 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
 
     private PolygonType mapNodes(Way way, Map<BigInteger, Node> mapOfNodes) {
 
-        List<Double> coordinates = way.getNd().stream()
+        DirectPositionListType dplt = new DirectPositionListType();
+        way.getNd().stream()
                 .map(nd -> mapOfNodes.get(nd.getRef()))
-                .flatMap(node -> Stream.of(node.getLat(), node.getLon()))
-                .collect(Collectors.toList());
+                .forEachOrdered(node -> {
+                    dplt.getValue().add(node.getLat());
+                    dplt.getValue().add(node.getLon());
+                });
 
         AbstractRingPropertyType abstractRingPropertyType = new AbstractRingPropertyType()
-                .withAbstractRing(openGisObjectFactory.createLinearRing(
-                        new LinearRingType()
-                                .withPosList(
-                                        new DirectPositionListType().withValue(coordinates))));
+                .withAbstractRing(openGisObjectFactory.createLinearRing(new LinearRingType().withPosList(dplt)));
 
         return new PolygonType()
                 .withId("GEN-PolygonType" + way.getId())
@@ -348,36 +337,27 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
     }
 
     private void tagValueNotNull(String name, String value) {
-
         if (value == null) {
             throw new IllegalArgumentException("Cannot map '" + name + "' from tag. Value not present. Seems like there are no tags with name " + name);
         }
     }
 
-    protected List<GroupOfTariffZones> mapRelationsToGroupOfTariffZones(List<Relation> relations, List<Map<BigInteger, T>> fareZoneMaps) {
-        return relations.stream()
-                .map(rel -> mapRelationToGroupOfTariffZones(rel, fareZoneMaps))
-                .collect(Collectors.toList());
+    protected Stream<GroupOfTariffZones> mapRelationsToGroupOfTariffZones(List<Relation> relations, Map<BigInteger, String> fareZoneMaps) {
+        return relations.stream().map(rel -> mapRelationToGroupOfTariffZones(rel, fareZoneMaps));
     }
 
-    private GroupOfTariffZones mapRelationToGroupOfTariffZones(Relation relation, List<Map<BigInteger, T>> fareZoneMaps) {
+    private GroupOfTariffZones mapRelationToGroupOfTariffZones(Relation relation, Map<BigInteger, String> fareZoneMaps) {
         final GroupOfTariffZones groupOfTariffZones = new ObjectFactory().createGroupOfTariffZones();
         mapRelationTags(relation.getTag(), groupOfTariffZones);
-
-        final Map<BigInteger, String> wayIdFareZoneIds = fareZoneMaps.stream()
-                .flatMap(m -> m.entrySet().stream())
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getId()));
 
         final TariffZoneRefs_RelStructure tariffZoneRefsRelStructure = new TariffZoneRefs_RelStructure();
 
         relation.getMember().stream().map(Member::getRef)
                 .map(member -> new ObjectFactory().createTariffZoneRef(
                         new TariffZoneRef()
-                                .withRef(wayIdFareZoneIds.get(member))
-                                .withVersion("1")))
-                .forEach(t -> {
-                    tariffZoneRefsRelStructure.getTariffZoneRef_().add(t);
-                });
+                                .withRef(fareZoneMaps.get(member))
+                                .withVersion(DEFAULT_VERSION)))
+                .forEach(tariffZoneRefsRelStructure.getTariffZoneRef_()::add);
 
         groupOfTariffZones.withMembers(tariffZoneRefsRelStructure);
 
@@ -408,7 +388,7 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
         groupOfTariffZones.setId(groupOfTariffZoneId);
         groupOfTariffZones.withPrivateCode(new PrivateCodeStructure().withValue(privateCode));
         groupOfTariffZones.setPurposeOfGroupingRef(new PurposeOfGroupingRefStructure().withRef(purposeOfGroupingRef));
-        groupOfTariffZones.setVersion("1");
+        groupOfTariffZones.setVersion(DEFAULT_VERSION);
 
     }
 }

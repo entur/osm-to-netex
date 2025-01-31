@@ -28,6 +28,8 @@ import java.io.OutputStream;
 import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 
+import static org.entur.netex.conversion.osm.transformer.OsmToNetexMapper.DEFAULT_VERSION;
+
 public class NetexHelper {
 
     private final ObjectFactory netexObjectFactory;
@@ -89,7 +91,7 @@ public class NetexHelper {
 
     public SiteFrame createSiteFrame() {
         SiteFrame siteFrame = new SiteFrame();
-        siteFrame.setVersion("1");
+        siteFrame.setVersion(DEFAULT_VERSION);
         siteFrame.setId("OSM:SiteFrame:" + System.currentTimeMillis());
         siteFrame.setCreated(LocalDateTime.now());
         siteFrame.withFrameDefaults(

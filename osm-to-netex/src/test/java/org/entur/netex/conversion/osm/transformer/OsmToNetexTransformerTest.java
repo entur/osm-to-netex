@@ -1,17 +1,14 @@
 package org.entur.netex.conversion.osm.transformer;
 
-import jakarta.xml.bind.JAXBException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 import org.xmlunit.builder.DiffBuilder;
 import org.xmlunit.builder.Input;
 import org.xmlunit.diff.*;
 
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
 import java.io.*;
 import java.util.Map;
