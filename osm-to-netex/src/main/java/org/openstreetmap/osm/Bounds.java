@@ -23,6 +23,10 @@
 
 package org.openstreetmap.osm;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import jakarta.xml.bind.annotation.*;
 
 
@@ -48,13 +52,20 @@ import jakarta.xml.bind.annotation.*;
 @XmlType(name = "")
 @XmlRootElement(name = "bounds")
 public class Bounds {
-
+    @Min(-90)
+    @Max(90)
     @XmlAttribute(name = "minlat")
     protected Double minlat;
+    @Min(value=-180)
+    @Max(value=180)
     @XmlAttribute(name = "minlon")
     protected Double minlon;
+    @Min(value=-90)
+    @Max(value=90)
     @XmlAttribute(name = "maxlat")
     protected Double maxlat;
+    @Min(value=-180)
+    @Max(value=180)
     @XmlAttribute(name = "maxlon")
     protected Double maxlon;
 

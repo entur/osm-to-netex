@@ -23,9 +23,13 @@
 
 package org.openstreetmap.osm;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 import jakarta.xml.bind.annotation.*;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,7 +66,8 @@ import java.util.List;
 })
 @XmlRootElement(name = "way")
 public class Way {
-
+    @NotNull
+    @NotEmpty
     @XmlElement(required = true)
     protected List<Nd> nd;
     protected List<Tag> tag;
@@ -82,9 +87,10 @@ public class Way {
     @XmlAttribute(name = "changeset")
     @XmlSchemaType(name = "unsignedLong")
     protected BigInteger changeset;
+    @PastOrPresent
     @XmlAttribute(name = "timestamp")
     @XmlSchemaType(name = "dateTime")
-    protected XMLGregorianCalendar timestamp;
+    protected LocalDateTime timestamp;
 
     /**
      * Gets the value of the nd property.
@@ -264,9 +270,9 @@ public class Way {
      * Gets the value of the timestamp property.
      *
      * @return possible object is
-     * {@link XMLGregorianCalendar }
+     * {@link LocalDateTime }
      */
-    public XMLGregorianCalendar getTimestamp() {
+    public LocalDateTime getTimestamp() {
         return timestamp;
     }
 
@@ -274,9 +280,9 @@ public class Way {
      * Sets the value of the timestamp property.
      *
      * @param value allowed object is
-     *              {@link XMLGregorianCalendar }
+     *              {@link LocalDateTime }
      */
-    public void setTimestamp(XMLGregorianCalendar value) {
+    public void setTimestamp(LocalDateTime value) {
         this.timestamp = value;
     }
 

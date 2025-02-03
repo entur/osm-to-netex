@@ -23,6 +23,9 @@
 
 package org.openstreetmap.osm;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,11 +62,18 @@ import java.util.List;
 })
 @XmlRootElement(name = "osm")
 public class Osm {
-
+    @Valid
+    @NotNull
     @XmlElement(required = true)
     protected Bounds bounds;
+    @Valid
+    @NotNull
+    @NotEmpty
     protected List<Node> node;
+    @Valid
+    @NotNull
     protected List<Way> way;
+    @Valid
     protected List<Relation> relation;
     @XmlAttribute(name = "version")
     protected Float version;

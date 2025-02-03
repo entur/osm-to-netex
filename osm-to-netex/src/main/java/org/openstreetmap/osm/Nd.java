@@ -23,6 +23,7 @@
 
 package org.openstreetmap.osm;
 
+import jakarta.validation.constraints.NotNull;
 import jakarta.xml.bind.annotation.*;
 import java.math.BigInteger;
 
@@ -46,7 +47,7 @@ import java.math.BigInteger;
 @XmlType(name = "")
 @XmlRootElement(name = "nd")
 public class Nd {
-
+    @NotNull
     @XmlAttribute(name = "ref")
     @XmlSchemaType(name = "unsignedLong")
     protected BigInteger ref;

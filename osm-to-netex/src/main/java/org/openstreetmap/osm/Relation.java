@@ -23,9 +23,13 @@
 
 package org.openstreetmap.osm;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Size;
 import jakarta.xml.bind.annotation.*;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,7 +66,7 @@ import java.util.List;
 })
 @XmlRootElement(name = "relation")
 public class Relation {
-
+    @Size(min = 1, max = 32000, message = "A relation must have at least one member, and has a technical limit of 32,000 members. It is recommended not to use more than 300 members per relation.")
     protected List<Member> member;
     protected List<Tag> tag;
     @XmlAttribute(name = "id")
@@ -81,9 +85,10 @@ public class Relation {
     @XmlAttribute(name = "changeset")
     @XmlSchemaType(name = "unsignedLong")
     protected BigInteger changeset;
+    @PastOrPresent
     @XmlAttribute(name = "timestamp")
     @XmlSchemaType(name = "dateTime")
-    protected XMLGregorianCalendar timestamp;
+    protected LocalDateTime timestamp;
 
     /**
      * Gets the value of the member property.
@@ -263,9 +268,9 @@ public class Relation {
      * Gets the value of the timestamp property.
      *
      * @return possible object is
-     * {@link XMLGregorianCalendar }
+     * {@link LocalDateTime }
      */
-    public XMLGregorianCalendar getTimestamp() {
+    public LocalDateTime getTimestamp() {
         return timestamp;
     }
 
@@ -273,9 +278,9 @@ public class Relation {
      * Sets the value of the timestamp property.
      *
      * @param value allowed object is
-     *              {@link XMLGregorianCalendar }
+     *              {@link LocalDateTime }
      */
-    public void setTimestamp(XMLGregorianCalendar value) {
+    public void setTimestamp(LocalDateTime value) {
         this.timestamp = value;
     }
 

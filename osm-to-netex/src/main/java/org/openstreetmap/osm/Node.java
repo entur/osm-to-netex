@@ -23,9 +23,13 @@
 
 package org.openstreetmap.osm;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.PastOrPresent;
 import jakarta.xml.bind.annotation.*;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,13 +66,16 @@ import java.util.List;
 })
 @XmlRootElement(name = "node")
 public class Node {
-
     protected List<Tag> tag;
     @XmlAttribute(name = "id")
     @XmlSchemaType(name = "unsignedLong")
     protected BigInteger id;
+    @Min(value=-90)
+    @Max(value=90)
     @XmlAttribute(name = "lat")
     protected Double lat;
+    @Min(value=-180)
+    @Max(value=180)
     @XmlAttribute(name = "lon")
     protected Double lon;
     @XmlAttribute(name = "user")
@@ -84,9 +91,10 @@ public class Node {
     @XmlAttribute(name = "changeset")
     @XmlSchemaType(name = "unsignedLong")
     protected BigInteger changeset;
+    @PastOrPresent
     @XmlAttribute(name = "timestamp")
     @XmlSchemaType(name = "dateTime")
-    protected XMLGregorianCalendar timestamp;
+    protected LocalDateTime timestamp;
 
     /**
      * Gets the value of the tag property.
@@ -279,9 +287,9 @@ public class Node {
      * Gets the value of the timestamp property.
      *
      * @return possible object is
-     * {@link XMLGregorianCalendar }
+     * {@link LocalDateTime }
      */
-    public XMLGregorianCalendar getTimestamp() {
+    public LocalDateTime getTimestamp() {
         return timestamp;
     }
 
@@ -289,9 +297,9 @@ public class Node {
      * Sets the value of the timestamp property.
      *
      * @param value allowed object is
-     *              {@link XMLGregorianCalendar }
+     *              {@link LocalDateTime }
      */
-    public void setTimestamp(XMLGregorianCalendar value) {
+    public void setTimestamp(LocalDateTime value) {
         this.timestamp = value;
     }
 
