@@ -132,6 +132,7 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
     <tag k='valid_from' v='2021-02-01' />**
     <tag k='zoneTopology' v='tiled' />**
      */
+        List<IllegalArgumentException> tagErrors = new ArrayList<>();
         String codespace = null;
         String fareZoneId = null;
         String privateCode = null;
@@ -150,23 +151,23 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
                 zone.setName(new MultilingualString().withValue(tag.getV()).withLang(lang));
             } else if (tag.getK().startsWith(AUTHORITYREF)) {
                 String authorityRef = tag.getV();
-                tagValueNotNull(AUTHORITYREF, authorityRef);
+                tagErrorCollector(AUTHORITYREF, authorityRef, tagErrors);
                 zone.withTransportOrganisationRef(new ObjectFactory().createAuthorityRef(new AuthorityRef().withRef(authorityRef)));
             } else if (tag.getK().startsWith(PRIVATECODE)) {
                 privateCode = tag.getV();
             } else if (tag.getK().startsWith(ZONETOPOLOGY)) {
                 String value = tag.getV();
-                tagValueNotNull(ZONETOPOLOGY, value);
+                tagErrorCollector(ZONETOPOLOGY, value, tagErrors);
                 zone.withZoneTopology(ZoneTopologyEnumeration.fromValue(value));
             } else if (tag.getK().startsWith(SCOPINGMETHOD)) {
                 final String value = tag.getV();
-                tagValueNotNull(SCOPINGMETHOD, value);
+                tagErrorCollector(SCOPINGMETHOD, value, tagErrors);
                 final ScopingMethodEnumeration scopingMethodEnumeration = ScopingMethodEnumeration.fromValue(value);
                 zone.withScopingMethod(scopingMethodEnumeration);
 
             } else if (tag.getK().startsWith(MEMBERS)) {
                 final String value = tag.getV();
-                tagValueNotNull(MEMBERS, value);
+                tagErrorCollector(MEMBERS, value, tagErrors);
                 final String[] stopPlaces = value.split(";");
                 List<JAXBElement<? extends PointRefStructure>> stopPoints = Arrays.stream(stopPlaces)
                         .map(stopPlace -> new ObjectFactory().createScheduledStopPointRef(new ScheduledStopPointRefStructure().withRef(stopPlace)))
@@ -176,7 +177,7 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
                 }
             } else if (tag.getK().startsWith(NEIGHBOURS)) {
                 final String value = tag.getV();
-                tagValueNotNull(NEIGHBOURS, value);
+                tagErrorCollector(NEIGHBOURS, value, tagErrors);
                 final String[] neighbours = value.split(";");
                 final List<FareZoneRefStructure> fareZoneRefs = Arrays.stream(neighbours)
                         .map(farezone -> new FareZoneRefStructure().withRef(farezone))
@@ -188,7 +189,7 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
 
             } else if (tag.getK().equals(VALID_FROM)) {
                 String validFrom = tag.getV();
-                tagValueNotNull(VALID_FROM, validFrom);
+                tagErrorCollector(VALID_FROM, validFrom, tagErrors);
 
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 try {
@@ -200,7 +201,7 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
 
             } else if (tag.getK().equals(VALID_TO)) {
                 String validTo = tag.getV();
-                tagValueNotNull(VALID_TO, validTo);
+                tagErrorCollector(VALID_TO, validTo, tagErrors);
 
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 try {
@@ -226,9 +227,12 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
         }
 
 
-        tagValueNotNull(CODESPACE, codespace);
-        tagValueNotNull(FAREZONEID, fareZoneId);
-        tagValueNotNull(PRIVATECODE, privateCode);
+        tagErrorCollector(CODESPACE, codespace, tagErrors);
+        tagErrorCollector(FAREZONEID, fareZoneId, tagErrors);
+        tagErrorCollector(PRIVATECODE, privateCode, tagErrors);
+
+        checkTagErrors(tagErrors);
+
         zone.withPrivateCode(new PrivateCodeStructure().withValue(privateCode));
         generateOrSetTzMapping(zone, tzMapping, privateCode, codespace);
         zone.setId(fareZoneId);
@@ -267,6 +271,7 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
         String reference = null;
         LocalDateTime fromDate = null;
         LocalDateTime toDate = null;
+        List<IllegalArgumentException> tagErrors = new ArrayList<>();
 
         for (Tag tag : tags) {
 
@@ -281,14 +286,14 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
             } else if (tag.getK().startsWith(ZONE_TYPE)) {
                 String keyName = tag.getK();
                 String value = tag.getV();
-                tagValueNotNull(ZONE_TYPE, value);
+                tagErrorCollector(ZONE_TYPE, value, tagErrors);
 
                 KeyValueStructure keyValueStructure = new KeyValueStructure().withKey(keyName).withValue(value);
                 KeyListStructure keyListStructure = new KeyListStructure().withKeyValue(keyValueStructure);
                 zone.setKeyList(keyListStructure);
             } else if (tag.getK().equals(VALID_FROM)) {
                 String validFrom = tag.getV();
-                tagValueNotNull(VALID_FROM, validFrom);
+                tagErrorCollector(VALID_FROM, validFrom, tagErrors);
 
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 try {
@@ -299,7 +304,7 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
                 }
             } else if (tag.getK().equals(VALID_TO)) {
                 String validTo = tag.getV();
-                tagValueNotNull(VALID_TO, validTo);
+                tagErrorCollector(VALID_TO, validTo, tagErrors);
 
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 try {
@@ -321,9 +326,10 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
         }
 
 
-        //tagValueNotNull(CODESPACE, codespace);
-        //tagValueNotNull(REFERENCE, reference);
+        tagErrorCollector(CODESPACE, codespace, tagErrors);
+        tagErrorCollector(REFERENCE, reference, tagErrors);
 
+        checkTagErrors(tagErrors);
 
         zone.setId(generateId(codespace, className, reference));
     }
@@ -336,9 +342,17 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
         return osmTagName.substring(osmTagName.lastIndexOf(':') + 1);
     }
 
-    private void tagValueNotNull(String name, String value) {
+    private void tagErrorCollector(String name, String value, List<IllegalArgumentException> errors) {
         if (value == null) {
-            throw new IllegalArgumentException("Cannot map '" + name + "' from tag. Value not present. Seems like there are no tags with name " + name);
+            errors.add(new IllegalArgumentException(String.format("Missing tag or tag value: %s", name)));
+        }
+    }
+
+    private void checkTagErrors(List<IllegalArgumentException> errors) {
+        if(!errors.isEmpty()) {
+            IllegalArgumentException exception = new IllegalArgumentException("Some required tags are missing");
+            errors.forEach(exception::addSuppressed);
+            throw exception;
         }
     }
 
@@ -383,7 +397,10 @@ class OsmToNetexMapper<T extends Zone_VersionStructure> {
                 purposeOfGroupingRef = tag.getV();
             }
         }
-        tagValueNotNull("GroupOfTariffZoneId", groupOfTariffZoneId);
+
+        if(groupOfTariffZoneId == null) {
+            throw new IllegalArgumentException(String.format("Missing tag or tag value: %s", "GroupOfTariffZoneId"));
+        }
 
         groupOfTariffZones.setId(groupOfTariffZoneId);
         groupOfTariffZones.withPrivateCode(new PrivateCodeStructure().withValue(privateCode));
