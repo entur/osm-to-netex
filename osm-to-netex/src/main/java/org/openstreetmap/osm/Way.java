@@ -27,6 +27,9 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import org.openstreetmap.osm.utils.LocalDateTimeAdapter;
+
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
@@ -88,6 +91,7 @@ public class Way {
     @XmlSchemaType(name = "unsignedLong")
     protected BigInteger changeset;
     @PastOrPresent
+    @XmlJavaTypeAdapter(LocalDateTimeAdapter.class)
     @XmlAttribute(name = "timestamp")
     @XmlSchemaType(name = "dateTime")
     protected LocalDateTime timestamp;

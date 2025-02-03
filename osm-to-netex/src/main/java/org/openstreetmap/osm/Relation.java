@@ -27,6 +27,9 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Size;
 import jakarta.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import org.openstreetmap.osm.utils.LocalDateTimeAdapter;
+
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
@@ -86,6 +89,7 @@ public class Relation {
     @XmlSchemaType(name = "unsignedLong")
     protected BigInteger changeset;
     @PastOrPresent
+    @XmlJavaTypeAdapter(LocalDateTimeAdapter.class)
     @XmlAttribute(name = "timestamp")
     @XmlSchemaType(name = "dateTime")
     protected LocalDateTime timestamp;
