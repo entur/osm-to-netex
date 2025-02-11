@@ -35,6 +35,12 @@ public class NetexHelper {
     private final ObjectFactory netexObjectFactory;
     private final Marshaller marshaller;
 
+    /**
+     * Creates a NetexHelper that lets you manually control which ObjectFactory that is used for generating the NeTEx data
+     *
+     * @param netexObjectFactory THe ObjectFactory that is to be used to generate the XML output
+     * @see OsmToNetexTransformer which is the suggested way to transform OSM to NeTEx
+     */
     public NetexHelper(ObjectFactory netexObjectFactory) {
         this.netexObjectFactory = netexObjectFactory;
         try {
@@ -46,16 +52,22 @@ public class NetexHelper {
         }
     }
 
+    /**
+     * Creates a NeTEx XML from a PublicationDeliveryStructure using the ObjectFactory used for in the constructor
+     *
+     * @param publicationDeliveryStructure THe NeTEx objects that are to be used to generate the XML
+     * @param outputStream                 THe XML is piped through the outputStream
+     */
     public void marshalNetex(PublicationDeliveryStructure publicationDeliveryStructure, OutputStream outputStream) {
         try {
             marshaller.marshal(netexObjectFactory.createPublicationDelivery(publicationDeliveryStructure), outputStream);
         } catch (JAXBException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to generate XML output", e);
         }
     }
 
     @SuppressWarnings("unchecked")
-    public PublicationDeliveryStructure createPublicationDelivery(SiteFrame siteFrame, String generatedFrom, String participantRef) {
+    protected PublicationDeliveryStructure createPublicationDelivery(SiteFrame siteFrame, String generatedFrom, String participantRef) {
         return new PublicationDeliveryStructure()
                 .withPublicationTimestamp(LocalDateTime.now())
                 .withDescription(new MultilingualString()
@@ -65,7 +77,7 @@ public class NetexHelper {
                         .withCompositeFrameOrCommonFrame(netexObjectFactory.createSiteFrame(siteFrame)));
     }
 
-    public <ZONE extends Zone_VersionStructure> ZONE createNetexObject(Class<ZONE> clazz) {
+    protected <ZONE extends Zone_VersionStructure> ZONE createNetexObject(Class<ZONE> clazz) {
         try {
             return clazz.getConstructor().newInstance();
         } catch (Exception e) {
@@ -89,7 +101,7 @@ public class NetexHelper {
         return "unknown";
     }
 
-    public SiteFrame createSiteFrame() {
+    protected SiteFrame createSiteFrame() {
         SiteFrame siteFrame = new SiteFrame();
         siteFrame.setVersion(DEFAULT_VERSION);
         siteFrame.setId("OSM:SiteFrame:" + System.currentTimeMillis());

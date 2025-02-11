@@ -27,14 +27,11 @@ import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class OsmToNetexTransformer {
 
@@ -42,11 +39,24 @@ public class OsmToNetexTransformer {
 
     private final NetexHelper netexHelper;
 
+    /**
+     * Creates a new OsmToNetexTransformer using the standard ObjectFactory
+     */
     public OsmToNetexTransformer() {
         ObjectFactory netexObjectFactory = new ObjectFactory();
         this.netexHelper = new NetexHelper(netexObjectFactory);
     }
 
+    /**
+     * Marshall an OSM XML Input into a NeTEx XML OutputStream
+     *
+     * @param osmInput       The OSM XML input
+     * @param output         The NeTEx XML output
+     * @param targetEntity   The type of NeTEx structure the input is expected to be converted into. Supports {@link FareZone}, {@link TariffZone} and {@link TopographicPlace}. Will throw {@link ClassNotFoundException} on all other values
+     * @param generatedFrom  The name of the data used as input
+     * @param participantRef Which system created the data
+     * @throws ClassNotFoundException If {@param targetEntity} is not set to an allowed value
+     */
     public void marshallOsm(InputSource osmInput, OutputStream output, String targetEntity, String generatedFrom, String participantRef) throws ClassNotFoundException {
         try {
             OsmUnmarshaller osmUnmarshaller = new OsmUnmarshaller(false);
@@ -58,11 +68,21 @@ public class OsmToNetexTransformer {
 
             logger.info("Unmarshalled OSM file. generator: {}, version: {}, nodes: {}, ways: {}, relations: {}",
                     osm.getGenerator(), osm.getVersion(), osm.getNode().size(), osm.getWay().size(), osm.getRelation().size());
-        } catch (JAXBException | SAXException | IOException | ParserConfigurationException e) {
-            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to read input file", e);
         }
     }
 
+    /**
+     * Creates a PublicationDeliveryStructure from a parsed OSM data object
+     *
+     * @param osm            The parsed OSM XML as a Java Object
+     * @param targetEntity   The type of NeTEx structure the input is expected to be converted into. Supports {@link FareZone}, {@link TariffZone} and {@link TopographicPlace}. Will throw {@link ClassNotFoundException} on all other values
+     * @param generatedFrom  The name of the data used as input
+     * @param participantRef Which system created the data
+     * @return a {@link PublicationDeliveryStructure} object containing the converted data
+     * @throws ClassNotFoundException If {@param targetEntity} is not set to an allowed value
+     */
     public PublicationDeliveryStructure map(Osm osm, String targetEntity, String generatedFrom, String participantRef) throws ClassNotFoundException {
 
         /*

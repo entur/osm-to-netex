@@ -10,6 +10,7 @@ import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
 import jakarta.xml.bind.UnmarshallerHandler;
+
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -26,26 +27,51 @@ public class OsmUnmarshaller {
 
     private final UnmarshallerHandler unmarshallerHandler;
 
-    public OsmUnmarshaller(boolean performValidation) throws ParserConfigurationException, SAXException, JAXBException, IOException {
-        JAXBContext osmContext = JAXBContext.newInstance(Osm.class);
-        namespaceFilter = new NamespaceFilter(OSM_NAMESPACE);
-        SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-        SAXParser saxParser = saxParserFactory.newSAXParser();
-        XMLReader xmlReader = saxParser.getXMLReader();
-        namespaceFilter.setParent(xmlReader);
-        Unmarshaller osmContextUnmarshaller = osmContext.createUnmarshaller();
 
-        if(performValidation) {
-            OsmSchemaValidator osmSchemaValidator = new OsmSchemaValidator();
-            osmContextUnmarshaller.setSchema(osmSchemaValidator.getSchema());
+    /**
+     * Creates a new Marshaller to read OSM XML data into Java objects
+     *
+     * @param performValidation Indicates if marshall shall validate the OSM source
+     */
+    public OsmUnmarshaller(boolean performValidation) {
+        try {
+            JAXBContext osmContext = null;
+
+            osmContext = JAXBContext.newInstance(Osm.class);
+
+            namespaceFilter = new NamespaceFilter(OSM_NAMESPACE);
+            SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+            SAXParser saxParser = saxParserFactory.newSAXParser();
+            XMLReader xmlReader = saxParser.getXMLReader();
+            namespaceFilter.setParent(xmlReader);
+            Unmarshaller osmContextUnmarshaller = osmContext.createUnmarshaller();
+
+            if (performValidation) {
+                OsmSchemaValidator osmSchemaValidator = new OsmSchemaValidator();
+                osmContextUnmarshaller.setSchema(osmSchemaValidator.getSchema());
+            }
+            unmarshallerHandler = osmContextUnmarshaller.getUnmarshallerHandler();
+            namespaceFilter.setContentHandler(unmarshallerHandler);
+        } catch (JAXBException | ParserConfigurationException | SAXException | IOException e) {
+            throw new RuntimeException("Failed to create OSM UnMarshaller", e);
         }
-        unmarshallerHandler = osmContextUnmarshaller.getUnmarshallerHandler();
-        namespaceFilter.setContentHandler(unmarshallerHandler);
     }
 
-    public Osm unmarshall(InputSource source) throws JAXBException, IOException, SAXException {
-        namespaceFilter.parse(source);
-        return (Osm) unmarshallerHandler.getResult();
+
+    /**
+     * Unmarshalls an OSM XML into a Java Object
+     *
+     * @param source InputSource containing the XML
+     * @return parsed OSM Object
+     * @throws IOException if unable to read data from InputSource
+     */
+    public Osm unmarshall(InputSource source) throws IOException{
+        try {
+            namespaceFilter.parse(source);
+            return (Osm) unmarshallerHandler.getResult();
+        } catch (JAXBException | SAXException e) {
+            throw new RuntimeException("Failed parsing XML", e);
+        }
     }
 
 }
