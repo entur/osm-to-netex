@@ -34,6 +34,12 @@
             <organization>Entur</organization>
             <organizationUrl>http://www.entur.org</organizationUrl>
         </developer>
+        <developer>
+            <name>Esko Suomi</name>
+            <email>esko.suomi@solita.fi</email>
+            <organization>Solita</organization>
+            <organizationUrl>https://www.solita.fi/</organizationUrl>
+        </developer>
     </developers>
 
     <scm>
