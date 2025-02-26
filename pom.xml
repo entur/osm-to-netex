@@ -49,6 +49,10 @@
         <tag>HEAD</tag>
     </scm>
 
+    <properties>
+        <java.version>21</java.version>
+    </properties>
+
     <distributionManagement>
         <repository>
             <id>ossrh</id>
@@ -117,8 +121,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    <source>21</source>
-                    <target>21</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                     <encoding>UTF-8</encoding>
                     <compilerArgs>
                         <!--arg>-Werror</arg-->
