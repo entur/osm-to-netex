@@ -3,9 +3,6 @@ on:
   push:
     branches:
       - master
-  pull_request:
-    branches:
-      - master
 
 env:
     JFROG_USER: ${{ secrets.ARTIFACTORY_AUTH_USER }}
@@ -44,7 +41,7 @@ jobs:
           path: target/*.jar
   publish-release:
     name: Publish release to maven central
-    uses: entur/gha-maven-central/.github/workflows/maven-publish.yml@1
+    uses: entur/gha-maven-central/.github/workflows/maven-publish.yml@v1
     secrets: inherit
     with:
-      push_to_repo: true
+      push_to_repo: false
