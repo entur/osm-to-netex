@@ -136,7 +136,6 @@
                                     <sonatype>
                                         <active>RELEASE</active>
                                         <url>https://central.sonatype.com/api/v1/publisher</url>
-                                        <stagingRepositories>build/staging-deploy</stagingRepositories>
                                     </sonatype>
                                 </mavenCentral>
                                 <nexus2>
