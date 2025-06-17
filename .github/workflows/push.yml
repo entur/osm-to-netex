@@ -46,4 +46,4 @@ jobs:
     uses: entur/gha-maven-central/.github/workflows/maven-publish.yml@fix-maven-publish
     secrets: inherit
     with:
-      push_to_repo: false
+      push_to_repo: true
