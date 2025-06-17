@@ -3,12 +3,9 @@ on:
   push:
     branches:
       - master
-<<<<<<< fix/publish-artifacts-with-jreleaser
   pull_request:
     branches:
       - master
-=======
->>>>>>> master
 
 env:
     JFROG_USER: ${{ secrets.ARTIFACTORY_AUTH_USER }}
@@ -47,11 +44,7 @@ jobs:
           path: target/*.jar
   publish-release:
     name: Publish release to maven central
-<<<<<<< fix/publish-artifacts-with-jreleaser
     uses: entur/gha-maven-central/.github/workflows/maven-publish.yml@1.0.1
-=======
-    uses: entur/gha-maven-central/.github/workflows/maven-publish.yml@fix-maven-publish
->>>>>>> master
     secrets: inherit
     with:
       push_to_repo: true
