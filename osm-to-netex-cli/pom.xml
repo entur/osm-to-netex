@@ -3,8 +3,8 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.entur</groupId>
-    <artifactId>osm-to-netex-cli</artifactId>
+    <groupId>io.entur</groupId>
+    <artifactId>osm-to-netex-beta-cli</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <name>osm-to-netex-cli</name>
