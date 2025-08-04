@@ -1,0 +1,17 @@
+<osm version='0.6' generator='JOSM' xmlns="http://openstreetmap.org/osm/0.6">
+    <node id='-39122' lat='59.6714157' lon='10.2251785'>
+        <tag k="12" v="12"/>
+    </node>
+    <node id='-39124' lat='59.7304896' lon='10.0912439'>
+        <tag k="12" v="12"/>
+    </node>
+    <way id='-136284' action='modify'>
+        <nd ref='-39122'/>
+        <nd ref='-39124'/>
+        <tag k='area' v='tariffZone'/>
+        <tag k='codespace' v='BRA'/>
+        <tag k='name:nor' v='Kongsberg'/>
+        <tag k='reference' v='104'/>
+    </way>
+    <bounds/>
+</osm>
