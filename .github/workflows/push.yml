@@ -41,7 +41,7 @@ jobs:
           path: target/*.jar
   publish-release:
     name: Publish release to maven central
-    uses: entur/gha-maven-central/.github/workflows/maven-publish.yml@fix-maven-publish
+    uses: entur/gha-maven-central/.github/workflows/maven-publish.yml
     secrets: inherit
     with:
       push_to_repo: true
