@@ -1,0 +1,112 @@
+name: Hotfix Start (Gitflow)
+
+on:
+  workflow_dispatch:
+    inputs:
+      hotfix_version:
+        description: 'Hotfix version (e.g., 2.0.15.1 or leave empty to auto-increment patch)'
+        required: false
+        type: string
+      base_tag:
+        description: 'Base tag to create hotfix from (e.g., v2.0.15). Leave empty to use latest master.'
+        required: false
+        type: string
+
+jobs:
+  hotfix-start:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.base_tag || 'master' }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: liberica
+
+      - name: Get current version
+        id: get_version
+        run: |
+          CURRENT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          # Remove -SNAPSHOT if present
+          BASE_VERSION="${CURRENT_VERSION%-SNAPSHOT}"
+          echo "current_version=$BASE_VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: $BASE_VERSION"
+
+      - name: Calculate hotfix version
+        id: calc_version
+        run: |
+          chmod +x .github/scripts/next-version.sh
+
+          CURRENT_VERSION="${{ steps.get_version.outputs.current_version }}"
+
+          if [ -n "${{ inputs.hotfix_version }}" ]; then
+            HOTFIX_VERSION="${{ inputs.hotfix_version }}"
+          else
+            # Check if current version has 4 segments (already a hotfix)
+            if [[ "$CURRENT_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              # Increment the last segment
+              LAST_SEGMENT=$(echo "$CURRENT_VERSION" | awk -F. '{print $4}')
+              NEW_LAST=$((LAST_SEGMENT + 1))
+              HOTFIX_VERSION=$(echo "$CURRENT_VERSION" | awk -F. -v new=$NEW_LAST '{print $1"."$2"."$3"."new}')
+            else
+              # Add .1 to make it a hotfix version
+              HOTFIX_VERSION="${CURRENT_VERSION}.1"
+            fi
+          fi
+
+          echo "hotfix_version=$HOTFIX_VERSION" >> $GITHUB_OUTPUT
+          echo "Hotfix version will be: $HOTFIX_VERSION"
+
+      - name: Create hotfix branch
+        id: create_branch
+        run: |
+          HOTFIX_VERSION="${{ steps.calc_version.outputs.hotfix_version }}"
+          BRANCH_NAME="hotfix/${HOTFIX_VERSION}"
+
+          echo "Creating branch: $BRANCH_NAME"
+          git checkout -b "$BRANCH_NAME"
+
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+      - name: Update version to hotfix version
+        run: |
+          HOTFIX_VERSION="${{ steps.calc_version.outputs.hotfix_version }}"
+          echo "Updating version to: $HOTFIX_VERSION"
+
+          mvn -B versions:set -DnewVersion="$HOTFIX_VERSION" -DgenerateBackupPoms=false -DprocessAllModules=true
+
+          git add '*/pom.xml' pom.xml
+          git commit -m "chore: prepare hotfix $HOTFIX_VERSION"
+
+      - name: Push hotfix branch
+        run: |
+          BRANCH_NAME="${{ steps.create_branch.outputs.branch_name }}"
+          git push origin "$BRANCH_NAME"
+
+      - name: Create summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY <<EOF
+          ## Hotfix Started
+
+          - **Hotfix Version:** ${{ steps.calc_version.outputs.hotfix_version }}
+          - **Hotfix Branch:** \`${{ steps.create_branch.outputs.branch_name }}\`
+          - **Base:** \`${{ inputs.base_tag || 'master' }}\`
+          - **Base Version:** ${{ steps.get_version.outputs.current_version }}
+
+          ### Next Steps
+
+          1. Make your hotfix changes on the \`${{ steps.create_branch.outputs.branch_name }}\` branch
+          2. Test the hotfix thoroughly
+          3. When ready, merge the hotfix branch to \`master\` to trigger the hotfix release
+          4. The hotfix will be automatically published to Maven Central
+          5. The hotfix will be merged back to \`develop\` automatically
+          EOF

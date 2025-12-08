@@ -1,0 +1,24 @@
+name: Manual Hotfix (Emergency/Fallback)
+
+# This workflow is a FALLBACK for emergency situations.
+# For normal hotfixes, use: "Hotfix Start" → "Hotfix Finish" workflows
+# Only use this if the gitflow workflows fail or for emergency hotfixes.
+
+on:
+  workflow_dispatch:
+    inputs:
+      git_ref:
+        description: 'Git tag to release (e.g., v2.0.15.1). Tag must already exist!'
+        required: true
+        type: string
+
+jobs:
+  publish-hotfix:
+    name: Publish hotfix to Maven Central
+    uses: entur/gha-maven-central/.github/workflows/maven-publish.yml@v1
+    with:
+      snapshot: false
+      push_to_repo: false  # Don't push back for hotfixes
+      java_version: 21
+      git_ref: ${{ github.event.inputs.git_ref || github.ref }}
+    secrets: inherit

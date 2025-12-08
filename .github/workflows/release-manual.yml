@@ -1,0 +1,30 @@
+name: Manual Release (Emergency/Fallback)
+
+# This workflow is a FALLBACK for emergency situations.
+# For normal releases, use: "Release Start" → "Release Finish" workflows
+# Only use this if the gitflow workflows fail or for emergency releases.
+
+on:
+  workflow_dispatch:
+    inputs:
+      git_ref:
+        description: 'Git tag to release (e.g., v2.0.16). Tag must already exist!'
+        required: true
+        type: string
+      push_to_repo:
+        description: 'Push version update back to repo (usually false for manual releases)'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  publish-release:
+    name: Publish release to Maven Central
+    uses: entur/gha-maven-central/.github/workflows/maven-publish.yml@v1
+    with:
+      snapshot: false
+      push_to_repo: ${{ github.event.inputs.push_to_repo != 'false' && github.event.inputs.push_to_repo != false }}
+      java_version: 21
+      git_ref: ${{ github.event.inputs.git_ref || github.ref }}
+      next_version: ${{ github.event.inputs.next_version || 'auto' }}
+    secrets: inherit
