@@ -26,5 +26,5 @@ jobs:
       push_to_repo: ${{ github.event.inputs.push_to_repo != 'false' && github.event.inputs.push_to_repo != false }}
       java_version: 21
       git_ref: ${{ github.event.inputs.git_ref || github.ref }}
-      next_version: ${{ github.event.inputs.next_version || 'noop' }}
+      next_version: ${{ github.event.inputs.next_version || '' }}
     secrets: inherit
