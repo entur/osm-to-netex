@@ -120,6 +120,13 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <!-- Declare JReleaser plugin so it can be invoked at parent level -->
+            <plugin>
+                <groupId>org.jreleaser</groupId>
+                <artifactId>jreleaser-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
     </build>
 
     <profiles>
