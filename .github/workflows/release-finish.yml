@@ -80,6 +80,7 @@ jobs:
       push_to_repo: false
       java_version: 21
       git_ref: v${{ needs.get-release-version.outputs.version }}
+      next_version: "noop"
     secrets: inherit
 
   update-master:

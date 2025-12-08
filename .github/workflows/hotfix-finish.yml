@@ -72,6 +72,7 @@ jobs:
       push_to_repo: false
       java_version: 21
       git_ref: v${{ needs.get-hotfix-version.outputs.version }}
+      next_version: "noop"
     secrets: inherit
 
   merge-to-master:

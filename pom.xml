@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.entur</groupId>
     <artifactId>osm-to-netex</artifactId>
-    <version>1.3.3-SNAPSHOT</version>
+    <version>1.3.5-SNAPSHOT</version>
 
 
     <name>osm-to-netex</name>

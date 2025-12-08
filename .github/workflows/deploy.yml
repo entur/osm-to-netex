@@ -52,4 +52,5 @@ jobs:
       snapshot: true
       push_to_repo: false
       java_version: 21
+      next_version: "noop"
     secrets: inherit
