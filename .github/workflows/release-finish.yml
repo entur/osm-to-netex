@@ -11,7 +11,7 @@ on:
         description: 'Next version increment type for master'
         required: false
         type: choice
-        default: 'minor'
+        default: 'patch'
         options:
           - major
           - minor
@@ -80,7 +80,7 @@ jobs:
       push_to_repo: false
       java_version: 21
       git_ref: v${{ needs.get-release-version.outputs.version }}
-      next_version: ""
+      next_version: ${{ needs.get-release-version.outputs.version }}
     secrets: inherit
 
   update-master:
