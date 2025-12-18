@@ -15,11 +15,10 @@ on:
 jobs:
   publish-hotfix:
     name: Publish hotfix to Maven Central
-    uses: entur/gha-maven-central/.github/workflows/maven-publish.yml@v1
+    uses: entur/ror-gha-workflows/.github/workflows/hotfix-manual.yml@v1
     with:
-      snapshot: false
-      push_to_repo: false  # Don't push back for hotfixes
+      git_ref: ${{ inputs.git_ref }}
       java_version: 21
-      git_ref: ${{ github.event.inputs.git_ref || github.ref }}
-      next_version: ""
+      java_distribution: liberica
+      version_tag_prefix: v
     secrets: inherit
