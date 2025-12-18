@@ -15,7 +15,7 @@ on:
 jobs:
   publish-hotfix:
     name: Publish hotfix to Maven Central
-    uses: entur/ror-gha-workflows/.github/workflows/hotfix-manual.yml@v1
+    uses: entur/ror-gha-workflows/.github/workflows/hotfix-manual.yml@v1.0.1
     with:
       git_ref: ${{ inputs.git_ref }}
       java_version: 21

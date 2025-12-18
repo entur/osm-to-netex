@@ -23,7 +23,7 @@ on:
 
 jobs:
   release-finish:
-    uses: entur/ror-gha-workflows/.github/workflows/release-finish.yml@v1
+    uses: entur/ror-gha-workflows/.github/workflows/release-finish.yml@v1.0.1
     with:
       release_branch: ${{ inputs.release_branch }}
       next_version_increment: ${{ inputs.next_version_increment }}
