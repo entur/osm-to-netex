@@ -15,7 +15,7 @@ on:
 jobs:
   publish-release:
     name: Publish release to Maven Central
-    uses: entur/ror-gha-workflows/.github/workflows/release-manual.yml@v1.0.1
+    uses: entur/ror-gha-workflows/.github/workflows/release-manual.yml@v1
     with:
       git_ref: ${{ inputs.git_ref }}
       java_version: 21
