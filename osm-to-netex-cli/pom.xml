@@ -6,11 +6,11 @@
     <parent>
         <groupId>org.entur</groupId>
         <artifactId>osm-to-netex</artifactId>
-        <version>1.6.1</version>
+        <version>1.6.1.1</version>
     </parent>
     <groupId>io.entur</groupId>
     <artifactId>osm-to-netex-beta-cli</artifactId>
-    <version>1.6.1</version>
+    <version>1.6.1.1</version>
 
     <name>osm-to-netex-cli</name>
     <description>Converts osm files to netex files</description>
